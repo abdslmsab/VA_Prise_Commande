@@ -83,37 +83,21 @@ class PanierCommandeFragment : Fragment() {
     }
 
     private fun chargerArticleEtConditionnements(ean: String, conditionnementSpinner: Spinner) {
-        lifecycleScope.launch {
-            val xml = withContext(Dispatchers.IO) {
-                // Remplacez cette ligne par votre logique de téléchargement
-                FtpDownloadTask().downloadXmlFile(
-                    "server.nap-agency.com", "ftpVital", "Kz5Jkud6GG", "/articles.xml"
-                )
+        val articleTrouve = articles.firstOrNull { it.ean == ean }
+
+        articleTrouve?.let { article ->
+            // Mettez à jour le spinner avec les conditionnements de l'article
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, article.conditionnements)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            conditionnementSpinner.adapter = adapter
+
+            // Sélectionnez le conditionnement par défaut (s'il y en a un)
+            article.conditionnementDefaut?.let { defaultConditionnement ->
+                val position = adapter.getPosition(defaultConditionnement)
+                conditionnementSpinner.setSelection(position)
             }
-
-            withContext(Dispatchers.Main) {
-                if (xml.isNotEmpty()) {
-                    val articles = dataRepository.parseXmlToArticles(xml)
-                    val articleTrouve = articles.firstOrNull { it.ean == ean }
-
-                    articleTrouve?.let { article ->
-                        // Mettez à jour le spinner avec les conditionnements de l'article
-                        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, article.conditionnements)
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        conditionnementSpinner.adapter = adapter
-
-                        // Sélectionnez le conditionnement par défaut (s'il y en a un)
-                        article.conditionnementDefaut?.let { defaultConditionnement ->
-                            val position = adapter.getPosition(defaultConditionnement)
-                            conditionnementSpinner.setSelection(position)
-                        }
-                    } ?: run {
-                        Toast.makeText(context, "Article avec EAN: $ean non trouvé", Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    Toast.makeText(context, "Impossible de charger les données.", Toast.LENGTH_LONG).show()
-                }
-            }
+        } ?: run {
+            Toast.makeText(context, "Article avec EAN: $ean non trouvé", Toast.LENGTH_LONG).show()
         }
     }
 
