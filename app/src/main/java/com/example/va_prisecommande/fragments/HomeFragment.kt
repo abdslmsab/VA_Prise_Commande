@@ -90,10 +90,11 @@ class HomeFragment : Fragment() {
 
 
         view.findViewById<Button>(R.id.right_button)?.setOnClickListener {
-            if (salespersonAdapter.selectedCommercial == null) {
+            val selectedCommercial = salespersonAdapter.selectedCommercial
+            if (selectedCommercial == null) {
                 Toast.makeText(activity, "Veuillez sélectionner un commercial", Toast.LENGTH_SHORT).show()
             } else {
-                val fragment = ClientFragment()
+                val fragment = ClientFragment.newInstance(selectedCommercial)
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .addToBackStack(null)

@@ -19,6 +19,7 @@ import com.example.va_prisecommande.R
 import com.example.va_prisecommande.adapter.ClientAdapter
 import com.example.va_prisecommande.adapter.SalespersonAdapter
 import com.example.va_prisecommande.ftp.FtpDownloadTask
+import com.example.va_prisecommande.model.Commercial
 import com.example.va_prisecommande.viewmodel.ClientViewModel
 import com.example.va_prisecommande.viewmodel.MainViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -32,8 +33,21 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
 
+private const val PARAM_COMMERCIAL = "commercial"
 
 class ClientFragment : Fragment() {
+
+    companion object {
+        @JvmStatic
+        fun newInstance(commercial: Commercial) =
+            ClientFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(PARAM_COMMERCIAL, commercial);
+                }
+            }
+    }
+
+    private lateinit var commercial: Commercial
 
     private lateinit var clientAdapter: ClientAdapter
     private lateinit var viewModel: ClientViewModel
@@ -41,11 +55,15 @@ class ClientFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(ClientViewModel::class.java)
+        arguments?.let {
+            commercial = it.getParcelable(PARAM_COMMERCIAL)!!
+        }
     }
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val view = inflater?.inflate(R.layout.fragment_client, container, false)
 
@@ -68,7 +86,11 @@ class ClientFragment : Fragment() {
 
             withContext(Dispatchers.Main) {
                 if (xml.isEmpty()) {
-                    Toast.makeText(context, "Impossible de charger les données des clients.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Impossible de charger les données des clients.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 } else {
                     val clientsList = parseXmlToClients(xml)
                     clientAdapter = ClientAdapter(clientsList)
@@ -79,7 +101,8 @@ class ClientFragment : Fragment() {
             }
         }
 
-        val searchInput = view?.findViewById<TextInputLayout>(R.id.search_input)?.editText as TextInputEditText
+        val searchInput =
+            view?.findViewById<TextInputLayout>(R.id.search_input)?.editText as TextInputEditText
 
         searchInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -100,7 +123,8 @@ class ClientFragment : Fragment() {
             // Vérifiez si un commercial est sélectionné
             var isSelected = false
             for (i in 0 until clientAdapter.itemCount) {
-                val viewHolder = verticalRecyclerView?.findViewHolderForAdapterPosition(i) as? ClientAdapter.ViewHolder
+                val viewHolder =
+                    verticalRecyclerView?.findViewHolderForAdapterPosition(i) as? ClientAdapter.ViewHolder
                 if (viewHolder?.radioButton?.isChecked == true) {
                     isSelected = true
                     break
@@ -109,7 +133,8 @@ class ClientFragment : Fragment() {
 
             // S'il n'y a pas de commercial sélectionné, affichez un message d'erreur
             if (clientAdapter.getSelectedPosition() == -1) {
-                Toast.makeText(activity, "Veuillez sélectionner un client", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "Veuillez sélectionner un client", Toast.LENGTH_SHORT)
+                    .show()
             } else {
                 // Sinon, continuez avec l'affichage de la popup
                 showDocumentTypeDialog()
@@ -149,6 +174,7 @@ class ClientFragment : Fragment() {
                     }
                     currentTag = xmlPullParser.name
                 }
+
                 XmlPullParser.TEXT -> {
                     val text = xmlPullParser.text
                     currentClient?.let {
@@ -160,6 +186,7 @@ class ClientFragment : Fragment() {
                         }
                     }
                 }
+
                 XmlPullParser.END_TAG -> {
                     if (xmlPullParser.name == "row" && currentClient != null) {
                         clients.add(currentClient)
