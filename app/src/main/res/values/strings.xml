@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">VA_PriseCommande</string>
+    <string name="home_title">Utilisateur</string>
+    <string name="client">Client</string>
+    <string name="ajouter">Ajouter</string>
+    <string name="valider">Valider</string>
+    <string name="retour">Retour</string>
+    <string name="search_hint">Rechercher</string>
+    <string name="panier">Panier</string>
+    <string name="ean_title">Code-barre</string>
+    <string name="quantity_title">Quantité</string>
+    <string name="packaging_title">Conditionnement</string>
+    <string name="add_to_basket">Ajouter au panier</string>
+    <string name="consignes">Consignes</string>
+    <string name="livraison_title">Date de livraison</string>
+    <string name="plv_title">PLV</string>
+    <string name="commentaire_title">Commentaire</string>
+    <string name="recapitulatif">Récapitulatif</string>
+    <string name="annuler">Annuler</string>
+    <string name="envoyer">Envoyer</string>
+    <string name="quantity_title_uvc">Quantité (UVC)</string>
+    <string name="numerolot_title">Numero de lot</string>
+    <string name="ddm_title">DDM</string>
+    <string name="pvc_title">PVC</string>
+    <string name="retour_title">Date de retour</string>
+</resources>
