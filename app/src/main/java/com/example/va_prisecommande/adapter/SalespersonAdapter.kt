@@ -46,12 +46,13 @@ class SalespersonAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = "${selectedCommercial?.prenom} ${selectedCommercial?.nom}"
+        val commercial = filteredSalespersons[position]
+        holder.textView.text = "${commercial.prenom} ${commercial.nom}"
 
-        holder.radioButton.isChecked = commerciaux[position] == selectedCommercial
+        holder.radioButton.isChecked = filteredSalespersons[position] == selectedCommercial
 
         holder.radioButton.setOnClickListener {
-            selectedCommercial = commerciaux[holder.adapterPosition]
+            selectedCommercial = filteredSalespersons[holder.adapterPosition]
             notifyDataSetChanged()
         }
     }
