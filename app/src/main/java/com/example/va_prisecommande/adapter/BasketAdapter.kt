@@ -3,12 +3,13 @@ package com.example.va_prisecommande.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.model.ArticlePourPanier
 
-class BasketAdapter(private val articlesDansLePanier: List<ArticlePourPanier>) :
+class BasketAdapter(private val articlesDansLePanier: MutableList<ArticlePourPanier>) :
     RecyclerView.Adapter<BasketAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -16,6 +17,7 @@ class BasketAdapter(private val articlesDansLePanier: List<ArticlePourPanier>) :
         val productNameTextView: TextView = view.findViewById(R.id.product_name)
         val quantityTextView: TextView = view.findViewById(R.id.quantity_input)
         val packagingTextView: TextView = view.findViewById(R.id.packaging_input)
+        val deleteButton: Button = view.findViewById(R.id.delete_article_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,5 +36,10 @@ class BasketAdapter(private val articlesDansLePanier: List<ArticlePourPanier>) :
         holder.productNameTextView.text = article.nom
         holder.packagingTextView.text = article.conditionnement
         holder.quantityTextView.text = article.quantite.toString()
+
+        holder.deleteButton.setOnClickListener {
+            articlesDansLePanier.remove(article)
+            notifyDataSetChanged()
+        }
     }
 }
