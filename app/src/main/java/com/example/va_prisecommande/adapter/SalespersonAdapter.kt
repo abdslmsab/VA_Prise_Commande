@@ -49,7 +49,7 @@ class SalespersonAdapter(
         val commercial = filteredSalespersons[position]
         holder.textView.text = "${commercial.prenom} ${commercial.nom}"
 
-        holder.radioButton.isChecked = filteredSalespersons[position] == selectedCommercial
+        holder.radioButton.isChecked = commercial == selectedCommercial
 
         holder.radioButton.setOnClickListener {
             selectedCommercial = filteredSalespersons[holder.adapterPosition]

@@ -11,7 +11,8 @@ import com.example.va_prisecommande.R
 
 class ClientAdapter(private var clients: List<Client>) : RecyclerView.Adapter<ClientAdapter.ViewHolder>() {
     var filteredClients: List<Client> = clients
-    private var selectedPosition = -1
+    var selectedClient: Client? = null
+        private set
 
     //Boîte pour ranger tous les composants à contrôler
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
@@ -56,13 +57,11 @@ class ClientAdapter(private var clients: List<Client>) : RecyclerView.Adapter<Cl
         holder.addressClientItem.text = "${client.adresse}"
         holder.zipClientItem.text = "${client.codepostal}"
 
-        holder.radioButton.isChecked = position == selectedPosition
+        holder.radioButton.isChecked = client == selectedClient
 
         holder.radioButton.setOnClickListener {
-            selectedPosition = holder.adapterPosition
+            selectedClient = filteredClients[holder.adapterPosition]
             notifyDataSetChanged()
         }
     }
-
-    fun getSelectedPosition(): Int = selectedPosition
 }

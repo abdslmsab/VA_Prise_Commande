@@ -132,7 +132,7 @@ class ClientFragment : Fragment() {
             }
 
             // S'il n'y a pas de commercial sélectionné, affichez un message d'erreur
-            if (clientAdapter.getSelectedPosition() == -1) {
+            if (clientAdapter.selectedClient == null) {
                 Toast.makeText(activity, "Veuillez sélectionner un client", Toast.LENGTH_SHORT)
                     .show()
             } else {
