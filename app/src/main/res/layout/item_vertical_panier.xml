@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                tools:text="Code-barre : 3333040005603"
+                tools:text="3333040005603"
                 app:layout_constraintStart_toStartOf="@id/container"
                 app:layout_constraintTop_toBottomOf="@id/product_name" />
 
@@ -52,9 +52,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                tools:text="Quantité : 3"
+                android:text="Quantité : "
                 app:layout_constraintStart_toStartOf="@id/container"
                 app:layout_constraintTop_toBottomOf="@id/ean" />
+
+            <TextView
+                android:id="@+id/quantity_input"
+                style="@style/title_field"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                tools:text="3"
+                app:layout_constraintStart_toEndOf="@id/quantity"
+                app:layout_constraintTop_toTopOf="@id/quantity"
+                app:layout_constraintBottom_toBottomOf="@id/quantity"/>
 
             <TextView
                 android:id="@+id/packaging"
@@ -62,9 +73,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                tools:text="Conditionnement : Unknown"
+                android:text="Conditionnement : "
                 app:layout_constraintStart_toStartOf="@id/container"
                 app:layout_constraintTop_toBottomOf="@id/quantity" />
+
+            <TextView
+                android:id="@+id/packaging_input"
+                style="@style/title_field"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                tools:text="Baril"
+                app:layout_constraintStart_toEndOf="@id/packaging"
+                app:layout_constraintTop_toTopOf="@id/packaging"
+                app:layout_constraintBottom_toBottomOf="@id/packaging"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

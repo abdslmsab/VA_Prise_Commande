@@ -14,8 +14,8 @@ class BasketAdapter(private val articlesDansLePanier: List<ArticlePourPanier>) :
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val eanTextView: TextView = view.findViewById(R.id.ean)
         val productNameTextView: TextView = view.findViewById(R.id.product_name)
-        val packagingTextView: TextView = view.findViewById(R.id.packaging_input)
         val quantityTextView: TextView = view.findViewById(R.id.quantity_input)
+        val packagingTextView: TextView = view.findViewById(R.id.packaging_input)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
