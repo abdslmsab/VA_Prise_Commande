@@ -1,10 +1,8 @@
 package com.example.va_prisecommande.fragments
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,28 +14,34 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.adapter.SalespersonAdapter
-import com.example.va_prisecommande.ftp.FtpDownloadTask
-import com.example.va_prisecommande.model.Commercial
+import com.example.va_prisecommande.singleton.DataRepository
 import com.example.va_prisecommande.viewmodel.MainViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserFactory
-import java.io.StringReader
 
 class HomeFragment : Fragment() {
 
     private lateinit var salespersonAdapter: SalespersonAdapter
     private lateinit var viewModel: MainViewModel
+    // private lateinit var database: AppDatabase
+
+    /*
+    companion object {
+        private const val COMMERCIAUX_KEY = "commerciaux_xml"
+    }
+     */
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
+        /* database = Room.databaseBuilder(
+            requireContext(),
+            AppDatabase::class.java, "app_database"
+        ).build()
+
+         */
     }
 
     override fun onCreateView(
@@ -47,6 +51,9 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
+        // Initialisation et chargement des données
+        // initDataLoading()
+
         // Récupération du RecyclerView
         val verticalRecyclerView = view.findViewById<RecyclerView>(R.id.vertical_recycler_view)
 
@@ -54,21 +61,17 @@ class HomeFragment : Fragment() {
         verticalRecyclerView.adapter = salespersonAdapter
 
         lifecycleScope.launch {
-            val xml = withContext(Dispatchers.IO) {
-                // Logique de téléchargement
-                FtpDownloadTask().downloadXmlFile(
-                    "server.nap-agency.com", "ftpVital", "Kz5Jkud6GG", "/commerciaux.xml"
-                )
+            // Charger les données si elles ne sont pas déjà chargées
+            if (DataRepository.commerciaux == null) {
+                DataRepository.loadAllData()
             }
 
-            withContext(Dispatchers.Main) {
-                if (xml.isEmpty()) {
-                    Toast.makeText(context, "Impossible de charger les données.", Toast.LENGTH_LONG).show()
-                } else {
-                    val commerciauxList = parseXmlToCommerciaux(xml)
-                    salespersonAdapter = SalespersonAdapter(commerciauxList)
-                    verticalRecyclerView.adapter = salespersonAdapter
-                }
+            // Mettre à jour l'adaptateur avec les données des commerciaux
+            DataRepository.commerciaux?.let { commerciauxList ->
+                salespersonAdapter = SalespersonAdapter(commerciauxList)
+                verticalRecyclerView.adapter = salespersonAdapter
+            } ?: run {
+                Toast.makeText(context, "Impossible de charger les données.", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -105,45 +108,43 @@ class HomeFragment : Fragment() {
         return view
     }
 
-    fun parseXmlToCommerciaux(xml: String): List<Commercial> {
-        val cleanXml = xml.trim().removePrefix("\uFEFF")
-
-        val commerciaux = mutableListOf<Commercial>()
-        val xmlPullParserFactory = XmlPullParserFactory.newInstance()
-        val xmlPullParser = xmlPullParserFactory.newPullParser()
-        xmlPullParser.setInput(StringReader(cleanXml))
-
-        var eventType = xmlPullParser.eventType
-        var currentCommercial: Commercial? = null
-        var currentTag: String? = null
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            when (eventType) {
-                XmlPullParser.START_TAG -> {
-                    if (xmlPullParser.name == "row") {
-                        currentCommercial = Commercial("", "")
-                    }
-                    currentTag = xmlPullParser.name
-                }
-                XmlPullParser.TEXT -> {
-                    val text = xmlPullParser.text
-                    currentCommercial?.let {
-                        when (currentTag) {
-                            "Nom" -> it.nom = text
-                            "Prenom" -> it.prenom = text
-                        }
-                    }
-                }
-                XmlPullParser.END_TAG -> {
-                    if (xmlPullParser.name == "row" && currentCommercial != null) {
-                        commerciaux.add(currentCommercial)
-                        currentCommercial = null
-                    }
-                    currentTag = null
-                }
+    /*
+    private fun initDataLoading() {
+        database.dataCacheDao().getData(COMMERCIAUX_KEY).observe(viewLifecycleOwner) { dataCache ->
+            if (dataCache != null) {
+                // Les données sont chargées du cache
+                DataRepository.commerciaux = DataRepository.parseXmlToCommerciaux(dataCache.xmlData)
+                updateUIWithCommerciauxData()
+            } else {
+                // Les données ne sont pas dans le cache, télécharger les données
+                downloadAndSaveCommerciauxData()
             }
-            eventType = xmlPullParser.next()
         }
-        return commerciaux
     }
+
+
+    private fun updateUIWithCommerciauxData() {
+        DataRepository.commerciaux?.let { commerciauxList ->
+            salespersonAdapter = SalespersonAdapter(commerciauxList)
+            view?.findViewById<RecyclerView>(R.id.vertical_recycler_view)?.adapter = salespersonAdapter
+        } ?: run {
+            Toast.makeText(context, "Impossible de charger les données.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun downloadAndSaveCommerciauxData() {
+        lifecycleScope.launch {
+            val xmlData = withContext(Dispatchers.IO) {
+                // Votre logique de téléchargement ici
+                FtpDownloadTask().downloadXmlFile(
+                    "server.nap-agency.com", "ftpVital", "Kz5Jkud6GG", "/commerciaux.xml"
+                )
+            }
+            DataRepository.commerciaux = DataRepository.parseXmlToCommerciaux(xmlData)
+            database.dataCacheDao().insertData(DataCache(COMMERCIAUX_KEY, xmlData))
+            updateUIWithCommerciauxData()
+        }
+    }
+    */
+
 }

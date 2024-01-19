@@ -60,14 +60,15 @@
                             app:endIconTint="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/livraison_title"
-                            app:prefixText="33330400">
+                            app:layout_constraintTop_toBottomOf="@id/livraison_title">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:digits="0123456789/"
                                 android:inputType="number"
-                                android:maxLength="5" />
+                                android:maxLength="13"
+                                android:textSize="25sp" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 

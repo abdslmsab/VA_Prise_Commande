@@ -20,6 +20,7 @@ import com.example.va_prisecommande.adapter.ClientAdapter
 import com.example.va_prisecommande.adapter.SalespersonAdapter
 import com.example.va_prisecommande.ftp.FtpDownloadTask
 import com.example.va_prisecommande.model.Commercial
+import com.example.va_prisecommande.singleton.DataRepository
 import com.example.va_prisecommande.viewmodel.ClientViewModel
 import com.example.va_prisecommande.viewmodel.MainViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -77,27 +78,19 @@ class ClientFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            val xml = withContext(Dispatchers.IO) {
-                // Logique de téléchargement pour le fichier des clients
-                FtpDownloadTask().downloadXmlFile(
-                    "server.nap-agency.com", "ftpVital", "Kz5Jkud6GG", "/clients.xml"
-                )
+            if (DataRepository.clients == null) {
+                DataRepository.loadAllData()
             }
 
-            withContext(Dispatchers.Main) {
-                if (xml.isEmpty()) {
-                    Toast.makeText(
-                        context,
-                        "Impossible de charger les données des clients.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    val clientsList = parseXmlToClients(xml)
-                    clientAdapter = ClientAdapter(clientsList)
-                    if (verticalRecyclerView != null) {
-                        verticalRecyclerView.adapter = clientAdapter
-                    }
-                }
+            DataRepository.clients?.let { clientsList ->
+                clientAdapter = ClientAdapter(clientsList)
+                verticalRecyclerView?.adapter = clientAdapter
+            } ?: run {
+                Toast.makeText(
+                    context,
+                    "Impossible de charger les données des clients.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -152,51 +145,5 @@ class ClientFragment : Fragment() {
     private fun showDocumentTypeDialog() {
         val dialog = DocumentTypeDialogFragment()
         dialog.show(parentFragmentManager, "DocumentTypeDialogFragment")
-    }
-
-    fun parseXmlToClients(xml: String): List<Client> {
-        val cleanXml = xml.trim().removePrefix("\uFEFF")
-
-        val clients = mutableListOf<Client>()
-        val xmlPullParserFactory = XmlPullParserFactory.newInstance()
-        val xmlPullParser = xmlPullParserFactory.newPullParser()
-        xmlPullParser.setInput(StringReader(cleanXml))
-
-        var eventType = xmlPullParser.eventType
-        var currentClient: Client? = null
-        var currentTag: String? = null
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            when (eventType) {
-                XmlPullParser.START_TAG -> {
-                    if (xmlPullParser.name == "row") {
-                        currentClient = Client("", "", "", "")
-                    }
-                    currentTag = xmlPullParser.name
-                }
-
-                XmlPullParser.TEXT -> {
-                    val text = xmlPullParser.text
-                    currentClient?.let {
-                        when (currentTag) {
-                            "Code" -> it.code = text
-                            "Nom" -> it.nom = text
-                            "Adresse" -> it.adresse = text
-                            "CodePostal" -> it.codepostal = text
-                        }
-                    }
-                }
-
-                XmlPullParser.END_TAG -> {
-                    if (xmlPullParser.name == "row" && currentClient != null) {
-                        clients.add(currentClient)
-                        currentClient = null
-                    }
-                    currentTag = null
-                }
-            }
-            eventType = xmlPullParser.next()
-        }
-        return clients
     }
 }

@@ -8,10 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.example.va_prisecommande.R
-import com.example.va_prisecommande.fragments.ClientFragment
-import com.example.va_prisecommande.fragments.PanierAvoirFragment
-import com.example.va_prisecommande.fragments.PanierCommandeFragment
-import com.example.va_prisecommande.fragments.PanierRetourFragment
+import com.example.va_prisecommande.fragments.PanierFragment
 
 class DocumentTypeDialogFragment : DialogFragment() {
 
@@ -19,40 +16,33 @@ class DocumentTypeDialogFragment : DialogFragment() {
         return inflater.inflate(R.layout.popup_doc_type, container,false)
     }
 
+    private fun navigateToPanierFragmentWithType(documentType: DocumentType) {
+        val fragment = PanierFragment.newInstance(documentType)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+        dismiss()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val commandeButton = view.findViewById<Button>(R.id.commande_button)
         commandeButton.setOnClickListener {
-            val fragment = PanierCommandeFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
-
-            dismiss()
+            navigateToPanierFragmentWithType(DocumentType.COMMANDE)
         }
+
 
         val retourButton = view.findViewById<Button>(R.id.retour_button)
         retourButton.setOnClickListener {
-            val fragment = PanierRetourFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
-
-            dismiss()
+            navigateToPanierFragmentWithType(DocumentType.RETOUR)
         }
+
 
         val avoirButton = view.findViewById<Button>(R.id.avoir_button)
         avoirButton.setOnClickListener {
-            val fragment = PanierAvoirFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
-
-            dismiss()
+            navigateToPanierFragmentWithType(DocumentType.AVOIR)
         }
 
         // Close dialog if "Annuler" text is clicked
