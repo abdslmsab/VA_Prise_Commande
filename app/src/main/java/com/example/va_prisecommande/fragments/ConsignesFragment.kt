@@ -1,5 +1,6 @@
 package com.example.va_prisecommande.fragments
 
+import DocumentType
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,11 +8,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.example.va_prisecommande.R
+import com.google.android.material.textfield.TextInputLayout
 
-class ConsignesRetourFragment : Fragment() {
+class ConsignesFragment : Fragment() {
+    private var documentType: DocumentType? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        documentType = arguments?.getSerializable("documentType") as DocumentType?
     }
 
     override fun onCreateView(
@@ -19,9 +23,28 @@ class ConsignesRetourFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater?.inflate(R.layout.fragment_consignes_retour, container, false)
+        val view = inflater?.inflate(R.layout.fragment_consignes, container, false)
+
+        if (view != null) {
+            adjustFieldsBasedOnDocumentType(view, documentType)
+        }
 
         return view
+    }
+
+    private fun adjustFieldsBasedOnDocumentType(view: View, documentType: DocumentType?) {
+        when (documentType) {
+            DocumentType.COMMANDE -> {
+
+            }
+            DocumentType.RETOUR -> {
+
+            }
+            DocumentType.AVOIR -> {
+
+            }
+            else -> { /* Gérer le cas par défaut, si nécessaire */ }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

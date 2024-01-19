@@ -67,8 +67,7 @@
                                 android:layout_height="wrap_content"
                                 android:digits="0123456789/"
                                 android:inputType="number"
-                                android:maxLength="13"
-                                android:textSize="25sp" />
+                                android:maxLength="13"/>
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,6 +100,37 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <TextView
+                            android:id="@+id/retour_title"
+                            style="@style/title_field"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/default_card_margin_top_and_bottom"
+                            android:gravity="center_vertical"
+                            android:text="@string/retour_title"
+                            app:layout_constraintStart_toStartOf="@id/container"
+                            app:layout_constraintTop_toBottomOf="@id/plv_input" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/retour_input"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            app:endIconMode="clear_text"
+                            app:endIconTint="@color/primary"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/retour_title"
+                            app:prefixText="33330400">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:maxLength="5" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
                             android:id="@+id/commentaire_title"
                             style="@style/title_field"
                             android:layout_width="wrap_content"
@@ -108,8 +138,8 @@
                             android:layout_marginTop="@dimen/default_card_margin_top_and_bottom"
                             android:gravity="center_vertical"
                             android:text="@string/commentaire_title"
-                            app:layout_constraintStart_toStartOf="@id/commentaire_input"
-                            app:layout_constraintTop_toBottomOf="@id/plv_input" />
+                            app:layout_constraintStart_toStartOf="@id/container"
+                            app:layout_constraintTop_toBottomOf="@id/retour_input" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/commentaire_input"

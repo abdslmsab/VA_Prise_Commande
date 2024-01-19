@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -49,7 +48,7 @@ class PanierFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_panier_commande, container, false)
+        val view = inflater.inflate(R.layout.fragment_panier, container, false)
         adjustFieldsBasedOnDocumentType(view, documentType)
         val recyclerView = view.findViewById<RecyclerView>(R.id.vertical_recycler_view)
 
@@ -167,9 +166,13 @@ class PanierFragment : Fragment() {
 
         val validerBouton = view.findViewById<Button>(R.id.right_button)
         validerBouton.setOnClickListener {
-            val fragment = ConsignesCommandeFragment()
+            val consignesFragment = ConsignesFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable("documentType", documentType)
+                }
+            }
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+                .replace(R.id.fragment_container, consignesFragment)
                 .addToBackStack(null)
                 .commit()
         }
