@@ -104,7 +104,6 @@
                             style="@style/title_field"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/default_card_margin_top_and_bottom"
                             android:gravity="center_vertical"
                             android:text="@string/retour_title"
                             app:layout_constraintStart_toStartOf="@id/container"

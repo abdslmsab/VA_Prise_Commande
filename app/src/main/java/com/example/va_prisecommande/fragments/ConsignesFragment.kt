@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.va_prisecommande.R
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 class ConsignesFragment : Fragment() {
@@ -25,6 +27,12 @@ class ConsignesFragment : Fragment() {
     ): View? {
         val view = inflater?.inflate(R.layout.fragment_consignes, container, false)
 
+        val livraisonInputLayout = view?.findViewById<TextInputLayout>(R.id.livraison_input)
+        val livraisonEditText = livraisonInputLayout?.editText as TextInputEditText
+
+        val plvInputLayout = view.findViewById<TextInputLayout>(R.id.plv_input)
+        val plvEditText = plvInputLayout?.editText as TextInputEditText
+
         if (view != null) {
             adjustFieldsBasedOnDocumentType(view, documentType)
         }
@@ -35,13 +43,22 @@ class ConsignesFragment : Fragment() {
     private fun adjustFieldsBasedOnDocumentType(view: View, documentType: DocumentType?) {
         when (documentType) {
             DocumentType.COMMANDE -> {
-
+                view.findViewById<TextView>(R.id.retour_title).visibility = View.GONE
+                view.findViewById<TextInputLayout>(R.id.retour_input).visibility = View.GONE
             }
             DocumentType.RETOUR -> {
+                view.findViewById<TextView>(R.id.livraison_title).visibility = View.GONE
+                view.findViewById<TextInputLayout>(R.id.livraison_input).visibility = View.GONE
 
+                view.findViewById<TextView>(R.id.plv_title).visibility = View.GONE
+                view.findViewById<TextInputLayout>(R.id.plv_input).visibility = View.GONE
             }
             DocumentType.AVOIR -> {
+                view.findViewById<TextView>(R.id.livraison_title).visibility = View.GONE
+                view.findViewById<TextInputLayout>(R.id.livraison_input).visibility = View.GONE
 
+                view.findViewById<TextView>(R.id.plv_title).visibility = View.GONE
+                view.findViewById<TextInputLayout>(R.id.plv_input).visibility = View.GONE
             }
             else -> { /* Gérer le cas par défaut, si nécessaire */ }
         }
