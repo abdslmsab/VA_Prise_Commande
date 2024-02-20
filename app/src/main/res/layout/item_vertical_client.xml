@@ -62,9 +62,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                tools:text="69002 LYON"
+                tools:text="69002"
                 app:layout_constraintStart_toStartOf="@id/container"
                 app:layout_constraintTop_toBottomOf="@id/address_client_item" />
+
+            <TextView
+                android:id="@+id/city_client_item"
+                style="@style/address_client"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                tools:text="LYON"
+                android:layout_marginStart="@dimen/default_card_margin_top_and_bottom"
+                app:layout_constraintStart_toEndOf="@id/zip_client_item"
+                app:layout_constraintTop_toTopOf="@id/zip_client_item"/>
 
             <RadioButton
                 android:id="@+id/radio_button"

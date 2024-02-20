@@ -21,6 +21,7 @@ class ClientAdapter(private var clients: List<Client>) : RecyclerView.Adapter<Cl
         val nameClientItem: TextView = view.findViewById(R.id.name_client_item)
         val addressClientItem: TextView = view.findViewById(R.id.address_client_item)
         val zipClientItem: TextView = view.findViewById(R.id.zip_client_item)
+        val cityClientItem: TextView = view.findViewById(R.id.city_client_item)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,7 +45,8 @@ class ClientAdapter(private var clients: List<Client>) : RecyclerView.Adapter<Cl
                 it.code.lowercase().contains(lowerCaseQuery) ||
                         it.nom.lowercase().contains(lowerCaseQuery) ||
                         it.adresse.lowercase().contains(lowerCaseQuery) ||
-                        it.codepostal.lowercase().contains(lowerCaseQuery)
+                        it.code_postal.lowercase().contains(lowerCaseQuery) ||
+                        it.ville.lowercase().contains(lowerCaseQuery)
             }
         }
         notifyDataSetChanged()
@@ -55,7 +57,8 @@ class ClientAdapter(private var clients: List<Client>) : RecyclerView.Adapter<Cl
         holder.codeClientItem.text = "${client.code}"
         holder.nameClientItem.text = "${client.nom}"
         holder.addressClientItem.text = "${client.adresse}"
-        holder.zipClientItem.text = "${client.codepostal}"
+        holder.zipClientItem.text = "${client.code_postal}"
+        holder.cityClientItem.text = "${client.ville}"
 
         holder.radioButton.isChecked = client == selectedClient
 

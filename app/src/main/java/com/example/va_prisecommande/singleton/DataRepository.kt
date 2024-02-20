@@ -94,7 +94,7 @@ object DataRepository {
             when (eventType) {
                 XmlPullParser.START_TAG -> {
                     if (xmlPullParser.name == "row") {
-                        currentClient = Client("", "", "", "")
+                        currentClient = Client("", "", "", "", "")
                     }
                     currentTag = xmlPullParser.name
                 }
@@ -106,7 +106,8 @@ object DataRepository {
                             "Code" -> it.code = text
                             "Nom" -> it.nom = text
                             "Adresse" -> it.adresse = text
-                            "CodePostal" -> it.codepostal = text
+                            "Code_Postal" -> it.code_postal = text
+                            "Ville" -> it.ville = text
                         }
                     }
                 }
