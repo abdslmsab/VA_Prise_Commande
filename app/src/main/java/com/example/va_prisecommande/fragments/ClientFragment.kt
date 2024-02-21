@@ -21,8 +21,7 @@ import com.example.va_prisecommande.adapter.SalespersonAdapter
 import com.example.va_prisecommande.ftp.FtpDownloadTask
 import com.example.va_prisecommande.model.Commercial
 import com.example.va_prisecommande.singleton.DataRepository
-import com.example.va_prisecommande.viewmodel.ClientViewModel
-import com.example.va_prisecommande.viewmodel.MainViewModel
+import com.example.va_prisecommande.viewmodel.SharedViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
@@ -34,10 +33,13 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
 
+/*
 private const val PARAM_COMMERCIAL = "commercial"
+ */
 
 class ClientFragment : Fragment() {
 
+    /*
     companion object {
         @JvmStatic
         fun newInstance(commercial: Commercial) =
@@ -49,15 +51,22 @@ class ClientFragment : Fragment() {
     }
 
     private lateinit var commercial: Commercial
+     */
 
     private lateinit var clientAdapter: ClientAdapter
-    private lateinit var viewModel: ClientViewModel
+    private lateinit var viewModel: SharedViewModel
+    private var client: Client? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get(ClientViewModel::class.java)
+        /*
         arguments?.let {
             commercial = it.getParcelable(PARAM_COMMERCIAL)!!
+        }
+         */
+        viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        viewModel.selectedClient.observe(this) { selectedClient ->
+            client = selectedClient
         }
     }
 
@@ -125,10 +134,12 @@ class ClientFragment : Fragment() {
             }
 
             // S'il n'y a pas de commercial sélectionné, affichez un message d'erreur
-            if (clientAdapter.selectedClient == null) {
+            val selectedClient = clientAdapter.selectedClient
+            if (selectedClient == null) {
                 Toast.makeText(activity, "Veuillez sélectionner un client", Toast.LENGTH_SHORT)
                     .show()
             } else {
+                viewModel.selectClient(selectedClient)
                 // Sinon, continuez avec l'affichage de la popup
                 showDocumentTypeDialog()
             }

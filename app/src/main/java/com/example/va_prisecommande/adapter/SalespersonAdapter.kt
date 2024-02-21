@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.model.Commercial
-import com.example.va_prisecommande.viewmodel.MainViewModel
 
 class SalespersonAdapter(
     private val commerciaux: List<Commercial>
