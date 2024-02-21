@@ -2,12 +2,9 @@ package com.example.va_prisecommande.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.databinding.ActivityMainBinding
-import com.example.va_prisecommande.fragments.ClientFragment
 import com.example.va_prisecommande.fragments.HomeFragment
-import com.example.va_prisecommande.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
