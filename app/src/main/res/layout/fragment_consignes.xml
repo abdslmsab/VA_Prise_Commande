@@ -2,6 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data>
+
+        <variable
+            name="sharedViewModel"
+            type="com.example.va_prisecommande.viewmodel.SharedViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -57,12 +64,15 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             app:endIconMode="clear_text"
+                            android:hint="@string/saisir_la_ddm"
                             app:endIconTint="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/livraison_title">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/livraison_edit_text"
+                                android:text="@{sharedViewModel.dateLivraisonSaisie}"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:digits="0123456789/"
@@ -87,6 +97,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:hint="@string/saisir_le_support_de_plv"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/plv_title">
@@ -94,8 +105,9 @@
                             <com.google.android.material.textfield.TextInputEditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number"
-                                android:maxLength="4" />
+                                android:text="@{sharedViewModel.plvSaisi}"
+                                android:inputType="text"
+                                android:maxLength="50" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -116,16 +128,19 @@
                             android:layout_height="wrap_content"
                             app:endIconMode="clear_text"
                             app:endIconTint="@color/primary"
+                            android:hint="@string/saisir_la_ddm"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/retour_title"
-                            app:prefixText="33330400">
+                            app:layout_constraintTop_toBottomOf="@id/retour_title">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/retour_edit_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:text="@{sharedViewModel.dateRetourSaisie}"
+                                android:digits="0123456789/"
                                 android:inputType="number"
-                                android:maxLength="5" />
+                                android:maxLength="13"/>
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -145,7 +160,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:hint="Écrivez votre commentaire ici"
+                            android:hint="@string/crivez_votre_commentaire_ici"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/commentaire_title">
@@ -153,8 +168,9 @@
                             <com.google.android.material.textfield.TextInputEditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number"
-                                android:maxLength="4" />
+                                android:text="@{sharedViewModel.commentaireSaisi}"
+                                android:inputType="textMultiLine"
+                                android:maxLength="250" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 

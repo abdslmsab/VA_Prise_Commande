@@ -27,11 +27,16 @@
 
             <TextView
                 android:id="@+id/person_item"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 style="@style/Theme.VA_PriseCommande.H2"
-                app:layout_constraintStart_toStartOf="@id/container"/>
+                android:ellipsize="end"
+                android:maxLines="1"
+                app:layout_constraintStart_toStartOf="@id/container"
+                app:layout_constraintEnd_toStartOf="@+id/radio_button"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
             <RadioButton
                 android:id="@+id/radio_button"

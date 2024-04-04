@@ -18,6 +18,29 @@ object DataRepository {
     var clientsXml: String? = null
     var articlesXml: String? = null
 
+    /*
+        private lateinit var database: AppDatabase
+
+    fun initializeDatabase(context: Context) {
+        database = Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java, "app-database"
+        ).build()
+    }
+
+    suspend fun getAllCommerciaux(): List<Commercial> {
+        return withContext(Dispatchers.IO) {
+            database.commercialDao().getAll()
+        }
+    }
+
+    suspend fun updateCommerciaux(commerciaux: List<Commercial>) {
+        withContext(Dispatchers.IO) {
+            database.commercialDao().insertAll(commerciaux)
+        }
+    }
+
+     */
 
     suspend fun loadAllData() {
         commerciauxXml = downloadXml("/commerciaux.xml")

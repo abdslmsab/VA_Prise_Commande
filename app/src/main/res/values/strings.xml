@@ -23,4 +23,11 @@
     <string name="ddm_title">DDM</string>
     <string name="pvc_title">PVC</string>
     <string name="retour_title">Date de retour</string>
+    <string name="numero_lot">Saisir le numéro de lot</string>
+    <string name="saisir_la_ddm">JJ/MM/AA</string>
+    <string name="ean">Saisir le code-barre</string>
+    <string name="quantite">Saisir la quantité</string>
+    <string name="pvc">Saisir le Prix de Vente Constaté</string>
+    <string name="crivez_votre_commentaire_ici">Écrivez votre commentaire ici</string>
+    <string name="saisir_le_support_de_plv">Saisir le support de PLV</string>
 </resources>

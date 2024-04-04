@@ -12,14 +12,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.adapter.SalespersonAdapter
+import com.example.va_prisecommande.dao.CommercialDao
 import com.example.va_prisecommande.model.Commercial
 import com.example.va_prisecommande.singleton.DataRepository
+import com.example.va_prisecommande.singleton.DataRepository.downloadXml
+import com.example.va_prisecommande.singleton.DataRepository.parseXmlToCommerciaux
 import com.example.va_prisecommande.viewmodel.SharedViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -64,6 +70,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+
         val searchInput = view?.findViewById<TextInputLayout>(R.id.search_input)?.editText as TextInputEditText
 
         searchInput.addTextChangedListener(object : TextWatcher {
@@ -97,4 +104,30 @@ class HomeFragment : Fragment() {
 
         return view
     }
+    /*
+    lifecycleScope.launch {
+            try {
+                val contextNonNull = requireContext()
+                DataRepository.initializeDatabase(contextNonNull)
+                val localCommerciaux = getAllCommerciaux()
+
+                if (localCommerciaux.isNullOrEmpty()) {
+                    updateDataInBackground()
+                } else {
+                    salespersonAdapter.updateData(localCommerciaux)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Erreur lors de l'initialisation de la base de données", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        private suspend fun updateDataInBackground() {
+            // Télécharger les données depuis le serveur FTP et les parser
+            val commerciauxXml = downloadXml("/commerciaux.xml")
+            val commerciaux = parseXmlToCommerciaux(commerciauxXml ?: "")
+
+            // Mettre à jour la base de données Room
+            DataRepository.updateCommerciaux(commerciaux)
+        }
+     */
 }

@@ -11,8 +11,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.model.ArticlePourPanier
 
-class BasketAdapter(private val articlesDansLePanier: MutableList<ArticlePourPanier>, private val documentType: DocumentType) :
-    RecyclerView.Adapter<BasketAdapter.ViewHolder>() {
+class BasketAdapter(private val documentType: DocumentType) : RecyclerView.Adapter<BasketAdapter.ViewHolder>() {
+
+    private var articlesDansLePanier: List<ArticlePourPanier> = emptyList()
+
+    var onDeleteArticle: ((ArticlePourPanier) -> Unit)? = null
+
+    fun setArticlesDansLePanier(articles: List<ArticlePourPanier>) {
+        this.articlesDansLePanier = articles
+        notifyDataSetChanged()
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val eanTextView: TextView = view.findViewById(R.id.ean)
@@ -105,11 +113,16 @@ class BasketAdapter(private val articlesDansLePanier: MutableList<ArticlePourPan
             }
         }
 
+        /*
         // Gestion du bouton supprimer
         holder.deleteButton.setOnClickListener {
             articlesDansLePanier.remove(article)
             notifyDataSetChanged()
         }
-    }
+         */
 
+        holder.deleteButton.setOnClickListener {
+            onDeleteArticle?.invoke(article)
+        }
+    }
 }

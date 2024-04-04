@@ -4,6 +4,7 @@ import DocumentType
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,22 +13,32 @@ import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.get
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.adapter.BasketAdapter
+import com.example.va_prisecommande.databinding.FragmentPanierBinding
 import com.example.va_prisecommande.model.Article
-import com.example.va_prisecommande.model.ArticlePourPanier
-import com.example.va_prisecommande.singleton.DataRepository
+import com.example.va_prisecommande.viewmodel.DateViewModel
+import com.example.va_prisecommande.viewmodel.SharedViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.redmadrobot.inputmask.MaskedTextChangedListener
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PanierFragment : Fragment() {
     private lateinit var basketAdapter: BasketAdapter
-    private var articlesDansLePanier = mutableListOf<ArticlePourPanier>()
+    private lateinit var sharedViewModel: SharedViewModel
+    private lateinit var dateViewModel: DateViewModel
     private var articles: List<Article> = emptyList()
+    private var articleTrouve: Article? = null
     private var documentType: DocumentType? = null
 
     companion object {
@@ -41,19 +52,142 @@ class PanierFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         documentType = arguments?.getSerializable("documentType") as DocumentType?
-        basketAdapter = BasketAdapter(articlesDansLePanier, documentType!!)
-        chargerArticles()
+
+        sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+
+        dateViewModel = ViewModelProvider(this).get(DateViewModel::class.java)
+
+        basketAdapter = BasketAdapter(documentType!!)
     }
+
+    private var _binding:FragmentPanierBinding? = null;
+    private val binding get() = _binding!!;
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_panier, container, false)
+        _binding = FragmentPanierBinding.inflate(inflater,container,false);
+        val view = binding.root;
+
         adjustFieldsBasedOnDocumentType(view, documentType)
         val recyclerView = view.findViewById<RecyclerView>(R.id.vertical_recycler_view)
 
-        basketAdapter = BasketAdapter(articlesDansLePanier, documentType!!)
+        documentType?.let {
+            basketAdapter = BasketAdapter(it)
+        }
+
+        // basketAdapter = BasketAdapter(articlesDansLePanier, documentType!!)
         recyclerView.adapter = basketAdapter
+
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        dateViewModel.setDateActuelle(dateFormat.format(Date()))
+
+        val listener = MaskedTextChangedListener("[00]/[00]/[00]", binding.ddmEditText)
+        binding.ddmEditText.addTextChangedListener(listener)
+
+        val listenerPvc = MaskedTextChangedListener("[09]{.}[99]", binding.pvcEditText)
+        binding.pvcEditText.addTextChangedListener(listenerPvc)
+
+        binding.quantityInput.editText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null) {
+                    if (s.isNotEmpty()) {
+                        sharedViewModel.changementQuantite(s.toString())
+                    }
+                }
+            }
+        })
+
+        binding.quantityUvcInput.editText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null) {
+                    if (s.isNotEmpty()) {
+                        sharedViewModel.changementQuantiteUVC(s.toString())
+                    }
+                }
+            }
+        })
+
+        binding.numerolotInput.editText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null) {
+                    if (s.isNotEmpty()) {
+                        // Vérification du champ "numeroLot"
+                        lifecycleScope.launch {
+                            sharedViewModel.estNumeroLotValide.collect { estNumeroLotValide ->
+                                if (!estNumeroLotValide) {
+                                    binding.numerolotInput.error = "Le numéro de lot n'est pas valide."
+                                } else {
+                                    binding.numerolotInput.isErrorEnabled = false
+                                }
+                            }
+                        }
+                        sharedViewModel.changementNumeroLot(s.toString())
+                    }
+                }
+            }
+        })
+
+        binding.ddmInput.editText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null) {
+                    if (s.isNotEmpty()) {
+                        // Vérification du champ "DDM"
+                        lifecycleScope.launch {
+                            sharedViewModel.estDdmValide.collect { estDdmValide ->
+                                if (!estDdmValide) {
+                                    binding.ddmInput.error = "La Date de Durabilité Minimale n'est pas conforme."
+                                } else {
+                                    binding.ddmInput.isErrorEnabled = false
+                                }
+                            }
+                        }
+
+                        sharedViewModel.changementDdm(s.toString())
+                    }
+                }
+            }
+        })
+
+        binding.pvcInput.editText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null) {
+                    if (s.isNotEmpty()) {
+                        sharedViewModel.changementPvc(s.toString())
+                    }
+                }
+            }
+        })
 
         val eanInputLayout = view.findViewById<TextInputLayout>(R.id.ean_input)
         val eanEditText = eanInputLayout.editText as TextInputEditText
@@ -85,12 +219,25 @@ class PanierFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (s != null && s.length == 4) {
-                    val eanComplet = eanInputLayout.prefixText.toString() + s.toString()
-                    chargerArticleEtConditionnements(eanComplet, conditionnementSpinner)
+                val eanComplet = eanInputLayout.prefixText.toString() + s.toString()
+                if (s != null) {
+                    if (s.length == 5) {
+                        chargerArticleEtConditionnements(eanComplet, conditionnementSpinner)
+                    }
+
+                    // Vérification du champ "Ean"
+                    lifecycleScope.launch {
+                        sharedViewModel.estEanValide.collect { estEanValide ->
+                            if (!estEanValide) {
+                                binding.eanInput.error = "Le code opérateur requiert 13 caractères"
+                            } else {
+                                binding.eanInput.isErrorEnabled = false
+                            }
+                        }
+                    }
+                    sharedViewModel.changementEan(eanComplet)
                 }
             }
-
         })
 
         view.findViewById<Button>(R.id.add_button).setOnClickListener {
@@ -99,12 +246,93 @@ class PanierFragment : Fragment() {
             val conditionnementSelected = selectedItem?.toString() ?: "Valeur par défaut"
             val quantite = quantiteEditText.text.toString().toIntOrNull() ?: 0
 
-            val quantiteUvc = quantiteUvcEditText.text.toString().toIntOrNull()
+            val quantiteUvc = quantiteUvcEditText.text.toString().toIntOrNull() ?: 0
             val numLot = numLotEditText.text.toString().toIntOrNull()
             val ddm = ddmEditText.text.toString()
             val pvc = pvcEditText.text.toString().toFloatOrNull()
+            val code = articleTrouve?.code ?: "" // TODO
+            val nombreArticles = sharedViewModel.articlesDansLePanier.value?.size ?: 0
 
-            ajouterAuPanier(ean, conditionnementSelected, quantite, quantiteUvc, numLot, ddm, pvc)
+            val article = sharedViewModel.articles.value?.firstOrNull { it.ean == ean }
+
+            if (article != null) {
+                if (documentType == DocumentType.COMMANDE) {
+                    if (quantite == 0) {
+                        // Afficher un Toast ou un message d'erreur indiquant que la quantité ne peut pas être zéro
+                        Toast.makeText(
+                            requireContext(),
+                            "La quantité ne peut pas être zéro. Veuillez entrer une valeur valide.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        // Ajouter l'article au panier uniquement si la quantité n'est pas zéro
+                        sharedViewModel.ajouterAuPanier(
+                            ean,
+                            code,
+                            conditionnementSelected,
+                            quantite,
+                            quantiteUvc,
+                            numLot,
+                            ddm,
+                            pvc,
+                        )
+                        eanEditText.text?.clear()
+                        quantiteEditText.text?.clear()
+                        eanInputLayout.error = null
+
+                        val message = if (nombreArticles == 0) {
+                            "${nombreArticles + 1} article dans le panier"
+                        } else {
+                            "${nombreArticles + 1} articles dans le panier"
+                        }
+                        binding.nombreArticlePanier.text = message
+                    }
+                }
+
+                if (documentType == DocumentType.AVOIR || documentType == DocumentType.RETOUR) {
+                    if (quantiteUvc == 0) {
+                        Toast.makeText(
+                            requireContext(),
+                            "La quantité UVC ne peut pas être zéro. Veuillez entrer une valeur valide.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    if (pvc == null) {
+                        // Afficher un Toast ou un message d'erreur indiquant que le pvc ne peut pas être zéro
+                        Toast.makeText(
+                            requireContext(),
+                            "Le prix de vente constaté ne peut pas être nul. Veuillez entrer une valeur valide.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        sharedViewModel.ajouterAuPanier(
+                            ean,
+                            code,
+                            conditionnementSelected,
+                            quantite,
+                            quantiteUvc,
+                            numLot,
+                            ddm,
+                            pvc
+                        )
+                        eanEditText.text?.clear()
+                        quantiteUvcEditText.text?.clear()
+                        eanInputLayout.error = null
+                        numLotEditText.text?.clear()
+                        ddmEditText.text?.clear()
+                        pvcEditText.text?.clear()
+
+                        val message = if (nombreArticles == 0) {
+                            "${nombreArticles + 1} article dans le panier"
+                        } else {
+                            "${nombreArticles + 1} articles dans le panier"
+                        }
+                        binding.nombreArticlePanier.text = message
+                    }
+                }
+            } else {
+                Toast.makeText(requireContext(), "L'article avec le code-barres $ean n'existe pas.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         return view
@@ -137,7 +365,7 @@ class PanierFragment : Fragment() {
     }
 
     private fun chargerArticleEtConditionnements(ean: String, conditionnementSpinner: Spinner) {
-        val articleTrouve = articles.firstOrNull { it.ean == ean }
+        articleTrouve = articles.firstOrNull { it.ean == ean }
 
         articleTrouve?.let { article ->
             // Mettez à jour le spinner avec les conditionnements de l'article
@@ -158,74 +386,49 @@ class PanierFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        sharedViewModel.chargerArticles()
+
+        sharedViewModel.articles.observe(viewLifecycleOwner) { articlesList ->
+            articles = articlesList
+        }
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.vertical_recycler_view)
+        recyclerView.adapter = basketAdapter
+
+        sharedViewModel.articlesDansLePanier.observe(viewLifecycleOwner) { articles ->
+            basketAdapter.setArticlesDansLePanier(articles)
+        }
+        basketAdapter.onDeleteArticle = { article ->
+            sharedViewModel.retirerDuPanier(article)
+        }
 
         view.findViewById<Button>(R.id.left_button).setOnClickListener {
             // Permet de revenir en arrière lorsque le bouton gauche est cliqué
             requireActivity().supportFragmentManager.popBackStack()
+
+            sharedViewModel.viderToutLePanier()
         }
 
         val validerBouton = view.findViewById<Button>(R.id.right_button)
         validerBouton.setOnClickListener {
-            val consignesFragment = ConsignesFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable("documentType", documentType)
+            if (sharedViewModel.articlesDansLePanier.value.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "Le panier est vide. Ajoutez des articles avant de valider.", Toast.LENGTH_SHORT).show()
+            } else {
+                val consignesFragment = ConsignesFragment().apply {
+                    arguments = Bundle().apply {
+                        putSerializable("documentType", documentType)
+                    }
                 }
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, consignesFragment)
+                    .addToBackStack(null)
+                    .commit()
             }
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, consignesFragment)
-                .addToBackStack(null)
-                .commit()
         }
     }
 
-    fun findArticleByEan(ean: String, articles: List<Article>): Article? {
-        return articles.firstOrNull { it.ean == ean }
-    }
-
-    fun ajouterAuPanier(ean: String,
-                        conditionnement: String? = null,
-                        quantite: Int? = null,
-                        quantiteUvc: Int? = null,
-                        numLot: Int? = null,
-                        ddm: String? = null,
-                        pvc: Float? = null) {
-        val article = findArticleByEan(ean, articles)
-
-        if (article != null) {
-            // Création d'un nouvel objet ArticlePourPanier avec les valeurs disponibles
-            val articlePourPanier = ArticlePourPanier(
-                ean = ean,
-                nom = article.nom,
-                conditionnement = conditionnement,
-                quantite = quantite,
-                quantiteUvc = quantiteUvc,
-                numLot = numLot,
-                ddm = ddm,
-                pvc = pvc
-            )
-            articlesDansLePanier.add(articlePourPanier)
-            basketAdapter.notifyDataSetChanged()
-        } else {
-            Toast.makeText(context, "Article non trouvé", Toast.LENGTH_LONG).show()
-        }
-    }
-
-
-    private fun chargerArticles() {
-        lifecycleScope.launch {
-            if (DataRepository.articles == null) {
-                DataRepository.loadAllData()
-            }
-
-            DataRepository.articles?.let { articlesList ->
-                articles = articlesList
-            } ?: run {
-                Toast.makeText(
-                    context,
-                    "Impossible de charger les données des articles.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

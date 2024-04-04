@@ -10,11 +10,18 @@ import com.example.va_prisecommande.R
 import com.example.va_prisecommande.model.Commercial
 
 class SalespersonAdapter(
-    private val commerciaux: List<Commercial>
+    private var commerciaux: List<Commercial>
 ) : RecyclerView.Adapter<SalespersonAdapter.ViewHolder>() {
     var filteredSalespersons: List<Commercial> = commerciaux
     var selectedCommercial: Commercial? = null
         private set
+/*
+    fun updateData(newCommerciaux: List<Commercial>) {
+        commerciaux = newCommerciaux
+        filteredSalespersons = commerciaux
+        notifyDataSetChanged()
+    }
+ */
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView = view.findViewById(R.id.person_item)

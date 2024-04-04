@@ -17,10 +17,7 @@ class FtpDownloadTask {
                 return ""
             }
 
-            val inputStream = ftpClient.retrieveFileStream(filePath)
-            if (inputStream == null) {
-                return ""
-            }
+            val inputStream = ftpClient.retrieveFileStream(filePath) ?: return ""
 
             val reader = BufferedReader(InputStreamReader(inputStream))
             val data = reader.readText()
