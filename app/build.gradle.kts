@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.va_prisecommande"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.va_prisecommande"
@@ -69,4 +69,7 @@ dependencies {
 
     // To use Kotlin annotation processing tool (kapt)
     kapt("androidx.room:room-compiler:$room_version")
+
+    // To display a file in a view : https://github.com/afreakyelf/Pdf-Viewer?tab=readme-ov-file#local-and-on-device-files-
+    implementation("io.github.afreakyelf:Pdf-Viewer:2.1.1")
 }

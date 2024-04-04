@@ -65,7 +65,7 @@ class ConsignesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentConsignesBinding.inflate(inflater, container, false);
+        _binding = FragmentConsignesBinding.inflate(inflater, container, false)
         val view = binding.root;
 
         val livraisonInputLayout = view?.findViewById<TextInputLayout>(R.id.livraison_input)
@@ -238,9 +238,13 @@ class ConsignesFragment : Fragment() {
                 Toast.LENGTH_LONG
             ).show()
 
-            val fragment = RecapitulatifFragment()
+            val recapitulatifFragment = RecapitulatifFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable("pdfName", pdfName)
+                }
+            }
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+                .replace(R.id.fragment_container, recapitulatifFragment)
                 .addToBackStack(null)
                 .commit()
         }
