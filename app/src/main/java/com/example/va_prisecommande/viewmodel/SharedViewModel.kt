@@ -265,6 +265,4 @@ class SharedViewModel : ViewModel() {
     fun changementCommentaire(texte: String){
         _commentaireSaisi.value = texte
     }
-
-    private val _numeroBon = MutableLiveData<String>()
 }

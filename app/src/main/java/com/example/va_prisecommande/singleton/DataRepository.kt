@@ -55,7 +55,7 @@ object DataRepository {
 
     suspend fun downloadXml(path: String): String {
         return withContext(Dispatchers.IO) {
-            FtpDownloadTask().downloadXmlFile("server.nap-agency.com", "ftpVital", "Kz5Jkud6GG", path)
+            FtpDownloadTask().downloadXmlFile("141.94.170.53", "ftpVital", "Kz5Jkud6GG", path)
         }
     }
 

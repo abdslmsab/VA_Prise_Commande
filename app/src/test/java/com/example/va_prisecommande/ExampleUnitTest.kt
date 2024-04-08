@@ -14,7 +14,7 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         println(FtpDownloadTask().downloadXmlFile(
-            "server.nap-agency.com", "ftpVital", "Kz5Jkud6GG", "/commerciaux.xml"
+            "141.94.170.53", "ftpVital", "Kz5Jkud6GG", "/commerciaux.xml"
         ))
     }
 }

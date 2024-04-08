@@ -10,6 +10,8 @@ class FtpDownloadTask {
     fun downloadXmlFile(host: String, username: String, password: String, filePath: String): String {
         val ftpClient = FTPClient()
 
+        ftpClient.setUseEPSVwithIPv4(true)
+
         try {
             ftpClient.connect(host)
 

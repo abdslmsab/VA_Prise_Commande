@@ -58,7 +58,7 @@ class ConsignesFragment : Fragment() {
 
     private var dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    private var dateBonFormat = SimpleDateFormat("ddMMyy", Locale.getDefault())
+    private var dateBonFormat = SimpleDateFormat("yy", Locale.getDefault())
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -261,12 +261,12 @@ class ConsignesFragment : Fragment() {
         }
 
         val heureFormat = SimpleDateFormat("HHmm")
-        // val today = LocalDate.now()
-        // val dayOfYear = today.format(DateTimeFormatter.ofPattern("DDD"))
-        val initialePrenomCommercial = sharedViewModel.selectedCommercial.value?.prenom?.get(0)
-        val initialeNomCommercial = sharedViewModel.selectedCommercial.value?.nom?.get(0)
+        val today = LocalDate.now()
+        val dayOfYear = today.format(DateTimeFormatter.ofPattern("DDD"))
+        val initialePrenomCommercial = sharedViewModel.selectedCommercial.value?.prenom?.firstOrNull()?.toString() ?: ""
+        val initialeNomCommercial = sharedViewModel.selectedCommercial.value?.nom?.firstOrNull()?.toString() ?: ""
 
-        numeroBon = "${prefix}${dateBonFormat.format(Date())}${heureFormat.format(Date())}$initialePrenomCommercial$initialeNomCommercial"
+        numeroBon = "${prefix}${dateBonFormat.format(Date())}$dayOfYear${heureFormat.format(Date())}$initialePrenomCommercial$initialeNomCommercial"
 
         return numeroBon
     }
