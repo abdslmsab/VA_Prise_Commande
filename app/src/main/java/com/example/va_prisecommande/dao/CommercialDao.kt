@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CommercialDao {
     @Query("SELECT * FROM commercial")
-    fun getAll(): List<Commercial>
+    fun getAll(): Flow<List<Commercial>>
 
     @Insert
     fun insertAll(commerciaux: List<Commercial>)

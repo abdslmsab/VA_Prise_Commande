@@ -251,7 +251,6 @@ class PanierFragment : Fragment() {
             val ddm = ddmEditText.text.toString()
             val pvc = pvcEditText.text.toString().toFloatOrNull()
             val code = articleTrouve?.code ?: "" // TODO
-            val nombreArticles = sharedViewModel.articlesDansLePanier.value?.size ?: 0
 
             val article = sharedViewModel.articles.value?.firstOrNull { it.ean == ean }
 
@@ -279,13 +278,7 @@ class PanierFragment : Fragment() {
                         eanEditText.text?.clear()
                         quantiteEditText.text?.clear()
                         eanInputLayout.error = null
-
-                        val message = if (nombreArticles == 0) {
-                            "${nombreArticles + 1} article dans le panier"
-                        } else {
-                            "${nombreArticles + 1} articles dans le panier"
-                        }
-                        binding.nombreArticlePanier.text = message
+                        binding.eanInput.requestFocus()
                     }
                 }
 
@@ -321,17 +314,21 @@ class PanierFragment : Fragment() {
                         numLotEditText.text?.clear()
                         ddmEditText.text?.clear()
                         pvcEditText.text?.clear()
-
-                        val message = if (nombreArticles == 0) {
-                            "${nombreArticles + 1} article dans le panier"
-                        } else {
-                            "${nombreArticles + 1} articles dans le panier"
-                        }
-                        binding.nombreArticlePanier.text = message
+                        binding.eanInput.requestFocus()
                     }
                 }
             } else {
                 Toast.makeText(requireContext(), "L'article avec le code-barres $ean n'existe pas.", Toast.LENGTH_SHORT).show()
+            }
+
+            sharedViewModel.articlesDansLePanier.observe(viewLifecycleOwner) { articles ->
+                val nombreArticles = articles.size
+                val message = when (nombreArticles) {
+                    0 -> "Aucun article dans le panier"
+                    1 -> "$nombreArticles article dans le panier"
+                    else -> "$nombreArticles articles dans le panier"
+                }
+                binding.nombreArticlePanier.text = message
             }
         }
 

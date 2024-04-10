@@ -114,13 +114,13 @@ class BasketAdapter(private val documentType: DocumentType) : RecyclerView.Adapt
         }
 
         /*
-        // Gestion du bouton supprimer
         holder.deleteButton.setOnClickListener {
             articlesDansLePanier.remove(article)
             notifyDataSetChanged()
         }
          */
 
+        // Gestion du bouton supprimer
         holder.deleteButton.setOnClickListener {
             onDeleteArticle?.invoke(article)
         }

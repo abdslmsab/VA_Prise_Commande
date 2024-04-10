@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VA_PriseCommande</string>
+    <string name="app_name">Prise de commande</string>
     <string name="home_title">Utilisateur</string>
     <string name="client">Client</string>
     <string name="ajouter">Ajouter</string>

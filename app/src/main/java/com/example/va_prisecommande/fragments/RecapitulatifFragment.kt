@@ -18,14 +18,18 @@ import java.io.File
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.lifecycle.ViewModelProvider
+import com.example.va_prisecommande.viewmodel.SharedViewModel
 import com.redmadrobot.inputmask.BuildConfig
 
 class RecapitulatifFragment : Fragment() {
+    private lateinit var sharedViewModel: SharedViewModel
     private var pdfName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pdfName = arguments?.getSerializable("pdfName") as String?
+        sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
     private var _binding: FragmentRecapitulatifBinding? = null;
@@ -60,9 +64,13 @@ class RecapitulatifFragment : Fragment() {
 
         binding.rightButton.setOnClickListener {
             val file = File(PathsConstants.LOCAL_STORAGE, pdfName)
-
-            val subject = "TEST"
-            val message = "Ceci est un test"
+            val nomClient = sharedViewModel.selectedClient.value?.nom
+            val plv = sharedViewModel.plvSaisi.value.ifEmpty { "Aucune" }
+            val consigne = sharedViewModel.commentaireSaisi.value.ifEmpty { "Aucun commentaire" }
+            val prenomCommercial = sharedViewModel.selectedCommercial.value?.prenom
+            val nomCommercial = sharedViewModel.selectedCommercial.value?.nom
+            val subject = "VA x COMMANDES - $nomClient"
+            val message = "Bonjour,\n\nLa commande en pièce jointe est à enregistrer immédiatement en faisant particulièrement attention aux points suivants :\n\nPLV : $plv\n\nConsigne + : $consigne\n\nCordialement,\n$prenomCommercial $nomCommercial"
 
             // Envoi de l'email avec le fichier PDF en pièce jointe
             if (file.exists()) {
