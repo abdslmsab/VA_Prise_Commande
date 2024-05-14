@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.model.Commercial
+import kotlinx.coroutines.flow.Flow
 
 class SalespersonAdapter(
     private var commerciaux: List<Commercial>
@@ -15,13 +16,6 @@ class SalespersonAdapter(
     var filteredSalespersons: List<Commercial> = commerciaux
     var selectedCommercial: Commercial? = null
         private set
-/*
-    fun updateData(newCommerciaux: List<Commercial>) {
-        commerciaux = newCommerciaux
-        filteredSalespersons = commerciaux
-        notifyDataSetChanged()
-    }
- */
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView = view.findViewById(R.id.person_item)

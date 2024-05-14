@@ -1,18 +1,19 @@
 package com.example.va_prisecommande.fragments
 
+import AppDatabase
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.va_prisecommande.R
@@ -20,12 +21,9 @@ import com.example.va_prisecommande.adapter.SalespersonAdapter
 import com.example.va_prisecommande.dao.CommercialDao
 import com.example.va_prisecommande.model.Commercial
 import com.example.va_prisecommande.singleton.DataRepository
-import com.example.va_prisecommande.singleton.DataRepository.downloadXml
-import com.example.va_prisecommande.singleton.DataRepository.parseXmlToCommerciaux
 import com.example.va_prisecommande.viewmodel.SharedViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -33,6 +31,8 @@ class HomeFragment : Fragment() {
     private lateinit var salespersonAdapter: SalespersonAdapter
     private lateinit var viewModel: SharedViewModel
     private var commercial: Commercial? = null
+    private lateinit var database: AppDatabase
+    private lateinit var commercialDao: CommercialDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,26 +50,63 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
+        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val verticalRecyclerView = view.findViewById<RecyclerView>(R.id.vertical_recycler_view)
 
-        salespersonAdapter = SalespersonAdapter(emptyList())
-        verticalRecyclerView.adapter = salespersonAdapter
+        progressBar.visibility = View.VISIBLE
 
-        lifecycleScope.launch {
-            // Charger les données si elles ne sont pas déjà chargées
-            if (DataRepository.commerciaux == null) {
-                DataRepository.loadAllData()
-            }
-
-            // Mettre à jour l'adaptateur avec les données des commerciaux
-            DataRepository.commerciaux?.let { commerciauxList ->
-                salespersonAdapter = SalespersonAdapter(commerciauxList)
-                verticalRecyclerView.adapter = salespersonAdapter
-            } ?: run {
-                Toast.makeText(context, "Impossible de charger les données.", Toast.LENGTH_LONG).show()
-            }
+        if (!initializeDatabase()) {
+            // Toast.makeText(context, "Erreur lors de l'initialisation de la base de données", Toast.LENGTH_LONG).show()
         }
 
+        lifecycleScope.launch {
+            try {
+                val commerciaux: List<Commercial> = commercialDao.getAll()
+
+                if (commerciaux.isEmpty()) {
+                    DataRepository.loadAllData()
+                    salespersonAdapter = DataRepository.commerciaux?.let { SalespersonAdapter(it) }!!
+                    verticalRecyclerView.adapter = salespersonAdapter
+                    progressBar.visibility = View.GONE
+                } else {
+                    salespersonAdapter = SalespersonAdapter(commerciaux)
+                    verticalRecyclerView.adapter = salespersonAdapter
+                    progressBar.visibility = View.GONE
+                }
+
+                DataRepository.loadAllData()
+
+                DataRepository.commerciaux?.let { commerciauxList ->
+                    salespersonAdapter = SalespersonAdapter(commerciauxList)
+                    verticalRecyclerView.adapter = salespersonAdapter
+                } ?: run {
+                    Toast.makeText(context, "Impossible de charger la liste mise à jour", Toast.LENGTH_LONG).show()
+                }
+
+                DataRepository.commerciaux?.let { commercialDao.insertAll(it)}
+            } catch (e : Exception) {
+                Log.e("Data update", "Failed to load data from the database", e)
+
+                salespersonAdapter = SalespersonAdapter(emptyList())
+                verticalRecyclerView.adapter = salespersonAdapter
+
+                lifecycleScope.launch {
+                    // Charger les données si elles ne sont pas déjà chargées
+                    if (DataRepository.commerciaux == null) {
+                        DataRepository.loadAllData()
+                    }
+
+                    // Mettre à jour l'adaptateur avec les données des commerciaux
+                    DataRepository.commerciaux?.let { commerciauxList ->
+                        salespersonAdapter = SalespersonAdapter(commerciauxList)
+                        verticalRecyclerView.adapter = salespersonAdapter
+                        progressBar.visibility = View.GONE
+                    } ?: run {
+                        Toast.makeText(context, "Impossible de charger les données.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
 
         val searchInput = view?.findViewById<TextInputLayout>(R.id.search_input)?.editText as TextInputEditText
 
@@ -104,30 +141,19 @@ class HomeFragment : Fragment() {
 
         return view
     }
-    /*
-    lifecycleScope.launch {
-            try {
-                val contextNonNull = requireContext()
-                DataRepository.initializeDatabase(contextNonNull)
-                val localCommerciaux = getAllCommerciaux()
 
-                if (localCommerciaux.isNullOrEmpty()) {
-                    updateDataInBackground()
-                } else {
-                    salespersonAdapter.updateData(localCommerciaux)
-                }
-            } catch (e: Exception) {
-                Toast.makeText(context, "Erreur lors de l'initialisation de la base de données", Toast.LENGTH_SHORT).show()
-            }
+    private fun initializeDatabase(): Boolean {
+        val context = activity ?: return false
+        Log.d("Database Init", "Starting database initialization...")
+        try {
+            AppDatabase.initialiser(context)
+            database = AppDatabase.getInstance()
+            commercialDao = database.commercialDao()
+            Log.d("Database Init", "Database initialized successfully")
+            return true
+        } catch (e: Exception) {
+            Log.e("Database Initialization Error", "Error initializing database", e)
+            return false
         }
-
-        private suspend fun updateDataInBackground() {
-            // Télécharger les données depuis le serveur FTP et les parser
-            val commerciauxXml = downloadXml("/commerciaux.xml")
-            val commerciaux = parseXmlToCommerciaux(commerciauxXml ?: "")
-
-            // Mettre à jour la base de données Room
-            DataRepository.updateCommerciaux(commerciaux)
-        }
-     */
+    }
 }

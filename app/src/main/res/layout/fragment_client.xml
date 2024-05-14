@@ -27,12 +27,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:padding="20sp"
+            app:hintTextColor="@color/primary"
+            app:boxStrokeColor="@color/primary"
             app:startIconDrawable="@drawable/resized_search_icon"
             app:startIconTint="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/black"
                 android:inputType="text"/>
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -66,6 +69,7 @@
                 android:text="@string/retour"
                 android:textSize="@dimen/general_text_size"
                 app:strokeColor="@color/primary"
+                android:textColor="@color/primary"
                 app:strokeWidth="2dp"/>
 
             <Button
@@ -75,6 +79,8 @@
                 android:layout_marginStart="32dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white"
                 android:text="@string/valider"
                 android:textSize="@dimen/general_text_size" />
 

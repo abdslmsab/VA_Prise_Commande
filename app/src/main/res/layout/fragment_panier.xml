@@ -26,8 +26,8 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/page_title"
-            app:layout_constraintBottom_toTopOf="@id/button_container">
+            app:layout_constraintBottom_toTopOf="@id/button_container"
+            app:layout_constraintTop_toBottomOf="@id/page_title">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -40,6 +40,7 @@
                     android:layout_marginStart="@dimen/default_card_margin"
                     android:layout_marginTop="@dimen/default_card_margin"
                     android:layout_marginEnd="@dimen/default_card_margin"
+                    android:backgroundTint="@color/white"
                     android:orientation="vertical"
                     app:cardCornerRadius="10dp"
                     app:cardElevation="5dp"
@@ -66,13 +67,16 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:hint="@string/ean"
+                            app:boxStrokeColor="@color/primary"
                             app:endIconMode="clear_text"
                             app:endIconTint="@color/primary"
-                            android:hint="@string/ean"
+                            app:hintTextColor="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/ean_title"
-                            app:prefixText="33330400">
+                            app:prefixText="33330400"
+                            app:prefixTextColor="@color/black">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:layout_width="match_parent"
@@ -80,7 +84,8 @@
                                 android:inputType="number"
                                 android:maxLength="5"
                                 android:maxLines="1"
-                                android:text="@{sharedViewModel.eanSaisi}" />
+                                android:text="@{sharedViewModel.eanSaisi}"
+                                android:textColor="@color/black" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,6 +106,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:hint="@string/quantite"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/quantity_title">
@@ -109,8 +116,9 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number"
+                                android:maxLength="3"
                                 android:text="@{sharedViewModel.quantiteSaisie}"
-                                android:maxLength="3" />
+                                android:textColor="@color/black" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -125,15 +133,27 @@
                             app:layout_constraintStart_toStartOf="@id/packaging_input"
                             app:layout_constraintTop_toBottomOf="@id/quantity_input" />
 
-                        <Spinner
-                            android:id="@+id/packaging_input"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@id/packaging_input"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginVertical="12dp"
+                            android:hint="@string/s_lectionner_le_conditionnement"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/packaging_title"/>
+                            app:layout_constraintTop_toBottomOf="@id/packaging_title">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/packaging_input_auto_complete"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/black"
+                                android:background="@color/white"
+                                android:inputType="text" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <TextView
                             android:id="@+id/quantity_uvc_title"
@@ -150,8 +170,10 @@
                             android:id="@+id/quantity_uvc_input"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
-                            android:hint="@string/quantite"
                             android:layout_height="wrap_content"
+                            android:hint="@string/quantite"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/quantity_uvc_title">
@@ -159,9 +181,10 @@
                             <com.google.android.material.textfield.TextInputEditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@{sharedViewModel.quantiteUVCSaisie}"
                                 android:inputType="number"
-                                android:maxLength="3" />
+                                android:maxLength="3"
+                                android:text="@{sharedViewModel.quantiteUVCSaisie}"
+                                android:textColor="@color/black" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -181,22 +204,25 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/numerolot_title"
-                            app:endIconMode="clear_text"
                             android:hint="@string/numero_lot"
+                            app:boxStrokeColor="@color/primary"
                             app:counterMaxLength="5"
+                            app:endIconMode="clear_text"
                             app:errorEnabled="true"
                             app:helperText="AAQQQ avec AA = année en cours"
-                            app:helperTextEnabled="true">
+                            app:helperTextEnabled="true"
+                            app:hintTextColor="@color/primary"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/numerolot_title">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@{sharedViewModel.numeroLotSaisi}"
                                 android:inputType="number"
-                                android:maxLength="5" />
+                                android:maxLength="5"
+                                android:text="@{sharedViewModel.numeroLotSaisi}"
+                                android:textColor="@color/black" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -215,9 +241,11 @@
                             android:id="@+id/ddm_input"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
-                            android:hint="@string/saisir_la_ddm"
-                            app:endIconMode="clear_text"
                             android:layout_height="wrap_content"
+                            android:hint="@string/saisir_la_ddm"
+                            app:boxStrokeColor="@color/primary"
+                            app:endIconMode="clear_text"
+                            app:hintTextColor="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/ddm_title">
@@ -227,9 +255,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:digits="0123456789/"
+                                android:inputType="number"
                                 android:maxLength="13"
                                 android:text="@{sharedViewModel.ddmSaisie}"
-                                android:inputType="number"/>
+                                android:textColor="@color/black" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -250,6 +279,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:hint="@string/pvc"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/pvc_title">
@@ -258,9 +289,10 @@
                                 android:id="@+id/pvc_edit_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@{sharedViewModel.pvcSaisi}"
                                 android:inputType="numberDecimal"
-                                android:maxLength="5" />
+                                android:maxLength="5"
+                                android:text="@{sharedViewModel.pvcSaisi}"
+                                android:textColor="@color/black" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -270,7 +302,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/default_card_margin_top_and_bottom"
+                            android:backgroundTint="@color/primary"
                             android:text="@string/add_to_basket"
+                            android:textColor="@color/white"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/pvc_input" />
@@ -283,9 +317,10 @@
                     android:id="@+id/nombre_article_panier"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/black"
                     android:layout_marginStart="@dimen/default_card_margin"
                     android:layout_marginTop="@dimen/default_card_margin"
-                    app:layout_constraintTop_toBottomOf="@id/card_view"/>
+                    app:layout_constraintTop_toBottomOf="@id/card_view" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/vertical_recycler_view"
@@ -294,8 +329,8 @@
                     android:nestedScrollingEnabled="false"
                     android:orientation="vertical"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:reverseLayout="true"
-                    app:layout_constraintTop_toBottomOf="@id/nombre_article_panier"/>
+                    app:layout_constraintTop_toBottomOf="@id/nombre_article_panier"
+                    app:reverseLayout="true" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -319,6 +354,7 @@
                 android:layout_marginEnd="32dp"
                 android:layout_weight="1"
                 android:text="@string/retour"
+                android:textColor="@color/primary"
                 android:textSize="@dimen/general_text_size"
                 app:strokeColor="@color/primary"
                 app:strokeWidth="2dp" />
@@ -330,7 +366,9 @@
                 android:layout_marginStart="32dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
+                android:backgroundTint="@color/primary"
                 android:text="@string/valider"
+                android:textColor="@color/white"
                 android:textSize="@dimen/general_text_size" />
 
         </LinearLayout>

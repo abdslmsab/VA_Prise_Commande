@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -58,8 +60,6 @@ class ConsignesFragment : Fragment() {
 
     private var dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    private var dateBonFormat = SimpleDateFormat("yy", Locale.getDefault())
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -93,6 +93,8 @@ class ConsignesFragment : Fragment() {
             DocumentType.COMMANDE -> {
                 view.findViewById<TextView>(R.id.retour_title).visibility = View.GONE
                 view.findViewById<TextInputLayout>(R.id.retour_input).visibility = View.GONE
+
+                binding.livraisonInput.requestFocus()
             }
 
             DocumentType.RETOUR -> {
@@ -101,6 +103,8 @@ class ConsignesFragment : Fragment() {
 
                 view.findViewById<TextView>(R.id.plv_title).visibility = View.GONE
                 view.findViewById<TextInputLayout>(R.id.plv_input).visibility = View.GONE
+
+                binding.retourInput.requestFocus()
             }
 
             DocumentType.AVOIR -> {
@@ -109,6 +113,8 @@ class ConsignesFragment : Fragment() {
 
                 view.findViewById<TextView>(R.id.plv_title).visibility = View.GONE
                 view.findViewById<TextInputLayout>(R.id.plv_input).visibility = View.GONE
+
+                binding.retourInput.requestFocus()
             }
 
             else -> { /* Gérer le cas par défaut, si nécessaire */
@@ -226,9 +232,10 @@ class ConsignesFragment : Fragment() {
         val validerBouton = view.findViewById<Button>(R.id.right_button)
         validerBouton.setOnClickListener {
             //On génère le PDF
-            val numeroBon = genererNumeroBon()
-            val pdfName = (sharedViewModel.selectedClient.value?.code
-                ?: 0).toString() + "-$numeroBon.pdf"
+            val numeroBon = sharedViewModel.genererNumeroBon()
+            val _pdfName = (sharedViewModel.selectedClient.value?.code
+                ?: 0).toString() + "-$numeroBon"
+            val pdfName = "$_pdfName.pdf"
             val file = File(PathsConstants.LOCAL_STORAGE, pdfName)
             genererPdf(file, documentType)
 
@@ -241,6 +248,8 @@ class ConsignesFragment : Fragment() {
             val recapitulatifFragment = RecapitulatifFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable("pdfName", pdfName)
+                    putSerializable("_pdfName", _pdfName)
+                    putSerializable("documentType", documentType)
                 }
             }
             requireActivity().supportFragmentManager.beginTransaction()
@@ -248,27 +257,6 @@ class ConsignesFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
-    }
-
-    private fun genererNumeroBon(): String {
-        val numeroBon: String
-
-        val prefix = when (documentType) {
-            DocumentType.COMMANDE -> "BC"
-            DocumentType.AVOIR -> "BA"
-            DocumentType.RETOUR -> "BR"
-            else -> {}
-        }
-
-        val heureFormat = SimpleDateFormat("HHmm")
-        val today = LocalDate.now()
-        val dayOfYear = today.format(DateTimeFormatter.ofPattern("DDD"))
-        val initialePrenomCommercial = sharedViewModel.selectedCommercial.value?.prenom?.firstOrNull()?.toString() ?: ""
-        val initialeNomCommercial = sharedViewModel.selectedCommercial.value?.nom?.firstOrNull()?.toString() ?: ""
-
-        numeroBon = "${prefix}${dateBonFormat.format(Date())}$dayOfYear${heureFormat.format(Date())}$initialePrenomCommercial$initialeNomCommercial"
-
-        return numeroBon
     }
 
     fun genererPdf(file: File?, documentType: DocumentType?) {
@@ -284,7 +272,7 @@ class ConsignesFragment : Fragment() {
             //Crée le tableau à une ligne et trois colonnes
             val tableInfos: Table = Table(3).useAllAvailableWidth()
 
-            val numeroBon = genererNumeroBon()
+            val numeroBon = sharedViewModel.genererNumeroBon()
 
             //Crée les cellules du tableau
             val cell1: Cell = Cell().add(Paragraph(dateFormat.format(Date())))

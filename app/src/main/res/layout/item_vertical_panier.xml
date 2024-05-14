@@ -16,6 +16,7 @@
         android:layout_marginBottom="@dimen/default_card_margin_top_and_bottom"
         android:orientation="vertical"
         app:cardCornerRadius="10dp"
+        android:backgroundTint="@color/white"
         app:cardElevation="5dp"
         app:contentPadding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -191,6 +192,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                android:drawableTint="@color/primary"
                 app:icon="@drawable/delete_outline_black_24dp"
                 app:iconGravity="textStart"/>
 

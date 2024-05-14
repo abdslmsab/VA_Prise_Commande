@@ -75,7 +75,7 @@ object DataRepository {
             when (eventType) {
                 XmlPullParser.START_TAG -> {
                     if (xmlPullParser.name == "row") {
-                        currentCommercial = Commercial("", "")
+                        currentCommercial = Commercial(prenom = "", nom = "")
                     }
                     currentTag = xmlPullParser.name
                 }

@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
@@ -28,6 +29,7 @@ import com.example.va_prisecommande.viewmodel.SharedViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.redmadrobot.inputmask.MaskedTextChangedListener
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -52,16 +54,13 @@ class PanierFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         documentType = arguments?.getSerializable("documentType") as DocumentType?
-
         sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-
         dateViewModel = ViewModelProvider(this).get(DateViewModel::class.java)
-
         basketAdapter = BasketAdapter(documentType!!)
     }
 
     private var _binding:FragmentPanierBinding? = null;
-    private val binding get() = _binding!!;
+    private val binding get() = _binding ?: throw IllegalStateException("Binding is accessed after being destroyed")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -192,7 +191,8 @@ class PanierFragment : Fragment() {
         val eanInputLayout = view.findViewById<TextInputLayout>(R.id.ean_input)
         val eanEditText = eanInputLayout.editText as TextInputEditText
 
-        val conditionnementSpinner = view.findViewById<Spinner>(R.id.packaging_input)
+        // val conditionnementSpinner = view.findViewById<Spinner>(R.id.packaging_input)
+        val conditionnementSpinner = view.findViewById<AutoCompleteTextView>(R.id.packaging_input_auto_complete)
 
         val quantiteInputLayout = view.findViewById<TextInputLayout>(R.id.quantity_input)
         val quantiteEditText = quantiteInputLayout.editText as TextInputEditText
@@ -242,8 +242,8 @@ class PanierFragment : Fragment() {
 
         view.findViewById<Button>(R.id.add_button).setOnClickListener {
             val ean = eanInputLayout.prefixText.toString() + eanEditText.text.toString()
-            val selectedItem = conditionnementSpinner.selectedItem
-            val conditionnementSelected = selectedItem?.toString() ?: "Valeur par défaut"
+            // val selectedItem = conditionnementSpinner.selectedItem
+            val conditionnementSelected = conditionnementSpinner.text.toString()
             val quantite = quantiteEditText.text.toString().toIntOrNull() ?: 0
 
             val quantiteUvc = quantiteUvcEditText.text.toString().toIntOrNull() ?: 0
@@ -345,35 +345,42 @@ class PanierFragment : Fragment() {
                 view.findViewById<TextView>(R.id.ddm_title).visibility = View.GONE
                 view.findViewById<TextInputLayout>(R.id.ddm_input).visibility = View.GONE
                 view.findViewById<TextView>(R.id.pvc_title).visibility = View.GONE
-                view.findViewById<TextInputLayout>(R.id.pvc_input).visibility = View.GONE            }
+                view.findViewById<TextInputLayout>(R.id.pvc_input).visibility = View.GONE
+
+                binding.eanInput.requestFocus()
+            }
             DocumentType.RETOUR -> {
                 view.findViewById<TextView>(R.id.quantity_title).visibility = View.GONE
                 view.findViewById<TextInputLayout>(R.id.quantity_input).visibility = View.GONE
                 view.findViewById<TextView>(R.id.packaging_title).visibility = View.GONE
-                view.findViewById<Spinner>(R.id.packaging_input).visibility = View.GONE            }
+                view.findViewById<TextInputLayout>(R.id.packaging_input).visibility = View.GONE
+
+                binding.eanInput.requestFocus()
+            }
             DocumentType.AVOIR -> {
                 view.findViewById<TextView>(R.id.quantity_title).visibility = View.GONE
                 view.findViewById<TextInputLayout>(R.id.quantity_input).visibility = View.GONE
                 view.findViewById<TextView>(R.id.packaging_title).visibility = View.GONE
-                view.findViewById<Spinner>(R.id.packaging_input).visibility = View.GONE
+                view.findViewById<TextInputLayout>(R.id.packaging_input).visibility = View.GONE
+
+                binding.eanInput.requestFocus()
             }
             else -> { /* Gérer le cas par défaut, si nécessaire */ }
         }
     }
 
-    private fun chargerArticleEtConditionnements(ean: String, conditionnementSpinner: Spinner) {
+    private fun chargerArticleEtConditionnements(ean: String, conditionnementSpinner: AutoCompleteTextView) {
         articleTrouve = articles.firstOrNull { it.ean == ean }
 
         articleTrouve?.let { article ->
             // Mettez à jour le spinner avec les conditionnements de l'article
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, article.conditionnements)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            conditionnementSpinner.adapter = adapter
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, article.conditionnements)
+            //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            conditionnementSpinner.setAdapter(adapter)
 
             // Sélectionnez le conditionnement par défaut (s'il y en a un)
             article.conditionnementDefaut?.let { defaultConditionnement ->
-                val position = adapter.getPosition(defaultConditionnement)
-                conditionnementSpinner.setSelection(position)
+                conditionnementSpinner.setText(defaultConditionnement, false)
             }
         } ?: run {
             Toast.makeText(context, "Article avec EAN: $ean non trouvé", Toast.LENGTH_LONG).show()
@@ -400,10 +407,7 @@ class PanierFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.left_button).setOnClickListener {
-            // Permet de revenir en arrière lorsque le bouton gauche est cliqué
-            requireActivity().supportFragmentManager.popBackStack()
-
-            sharedViewModel.viderToutLePanier()
+            showPanierDialog()
         }
 
         val validerBouton = view.findViewById<Button>(R.id.right_button)
@@ -424,8 +428,15 @@ class PanierFragment : Fragment() {
         }
     }
 
+    private fun showPanierDialog() {
+        val dialog = PanierDialogFragment()
+        dialog.show(parentFragmentManager, "PanierDialogFragment")
+    }
+
+    /*
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+     */
 }

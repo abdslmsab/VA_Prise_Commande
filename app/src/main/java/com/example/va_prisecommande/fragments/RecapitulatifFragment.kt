@@ -1,5 +1,6 @@
 package com.example.va_prisecommande.fragments
 
+import DocumentType
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,27 +9,29 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.example.va_prisecommande.R
 import com.example.va_prisecommande.databinding.FragmentRecapitulatifBinding
 import com.example.va_prisecommande.utils.PathsConstants
-import com.rajat.pdfviewer.PdfViewerActivity
-import com.rajat.pdfviewer.util.saveTo
 import java.io.File
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
+import com.example.va_prisecommande.ftp.FtpSendFileTask
 import com.example.va_prisecommande.viewmodel.SharedViewModel
-import com.redmadrobot.inputmask.BuildConfig
+import java.io.FileWriter
 
 class RecapitulatifFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
     private var pdfName: String? = null
+    private var _pdfName: String? = null
+    private var documentType: DocumentType? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        documentType = arguments?.getSerializable("documentType") as DocumentType?
         pdfName = arguments?.getSerializable("pdfName") as String?
+        _pdfName = arguments?.getSerializable("_pdfName") as String?
         sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
@@ -64,17 +67,29 @@ class RecapitulatifFragment : Fragment() {
 
         binding.rightButton.setOnClickListener {
             val file = File(PathsConstants.LOCAL_STORAGE, pdfName)
+            val textFile = File(PathsConstants.LOCAL_STORAGE, "$_pdfName.txt")
             val nomClient = sharedViewModel.selectedClient.value?.nom
             val plv = sharedViewModel.plvSaisi.value.ifEmpty { "Aucune" }
-            val consigne = sharedViewModel.commentaireSaisi.value.ifEmpty { "Aucun commentaire" }
-            val prenomCommercial = sharedViewModel.selectedCommercial.value?.prenom
-            val nomCommercial = sharedViewModel.selectedCommercial.value?.nom
+            val consigne = sharedViewModel.commentaireSaisi.value.ifEmpty { "Aucune" }
+            val numeroClient = sharedViewModel.selectedClient.value?.code + " | " + sharedViewModel.selectedClient.value?.nom
+            val dateLivraison = sharedViewModel.dateLivraisonSaisie.value
+            val prenomCommercial = sharedViewModel.selectedCommercial.value?.prenom ?: ""
+            val nomCommercial = sharedViewModel.selectedCommercial.value?.nom ?: ""
+            val commercial = "$prenomCommercial $nomCommercial"
+            val listePanier = if (documentType == DocumentType.COMMANDE) sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
+                "N° Art. : ${article.code} | Qté : ${article.quantite ?: 0} | PCB : ${article.conditionnement ?: "Non spécifié"}"
+            } ?: "Le panier est vide" else sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
+                "N° Art. : ${article.code} | Qté UVC : ${article.quantiteUvc ?: 0} | N° Lot : ${article.numLot ?: "Non spécifié"} | DDM : ${article.ddm ?: "Non spécifiée"} | PVC : ${article.pvc ?: "Non spécifié"}"
+            } ?: "Le panier est vide"
+
             val subject = "VA x COMMANDES - $nomClient"
-            val message = "Bonjour,\n\nLa commande en pièce jointe est à enregistrer immédiatement en faisant particulièrement attention aux points suivants :\n\nPLV : $plv\n\nConsigne + : $consigne\n\nCordialement,\n$prenomCommercial $nomCommercial"
+            val message = "Commande à enregistrer immédiatement\n\nN° Client : $numeroClient\nDate Livr. : $dateLivraison\nVendeur : $commercial\n\nPLV : $plv\n\n$listePanier\n\nConsigne + : $consigne\n\nMerci"
 
             // Envoi de l'email avec le fichier PDF en pièce jointe
             if (file.exists()) {
-                sendEmail("commandes@vital-aine.com", subject, message, file)
+                sendEmail("commandes@vital-aine.com", subject, message, file, textFile)
+                generateTextFile()
+                sharedViewModel.viderToutLePanier()
             } else {
                 Toast.makeText(requireContext(), "Fichier PDF non trouvé", Toast.LENGTH_SHORT).show()
             }
@@ -86,21 +101,64 @@ class RecapitulatifFragment : Fragment() {
         }
     }
 
+    fun generateTextFile() {
+        val fileName = "$_pdfName.txt"
+        val numeroBon = sharedViewModel.genererNumeroBon()
+        val codeClient = sharedViewModel.selectedClient.value?.code
+        val dateLivraison = sharedViewModel.dateLivraisonSaisie.value
+
+        val content = sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
+            "$numeroBon,$codeClient,$dateLivraison,${article.code},${article.quantite ?: 0}, ${article.conditionnement ?: 0}"
+        }
+
+        try {
+            val file = File(PathsConstants.LOCAL_STORAGE, fileName)
+            val writer = FileWriter(file)
+            writer.write(content ?: "")
+            writer.close()
+
+            Toast.makeText(
+                requireContext(),
+                "Le fichier '$fileName' a bien été créé",
+                Toast.LENGTH_LONG
+            ).show()
+
+            FtpSendFileTask().uploadTextFile("141.94.170.53", "ftpVital", "Kz5Jkud6GG", file.absolutePath, "/Commandes/$fileName")
+        } catch (e: Exception) {
+            Toast.makeText(
+                requireContext(),
+                "Une erreur est survenue: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     @SuppressLint("IntentReset")
-    private fun sendEmail(recipient: String, subject: String, message: String, file: File) {
-        val mIntent = Intent(Intent.ACTION_SEND).apply {
+    private fun sendEmail(recipient: String, subject: String, message: String, file: File, textFile: File) {
+        val mIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             data = Uri.parse("mailto:")
-            type = "vnd.android.cursor.dir/email"
+            type = "message/rfc822"
             putExtra(Intent.EXTRA_EMAIL, arrayOf(recipient))
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, message)
+
+            val files = arrayListOf<Uri>()
 
             val fileUri: Uri = FileProvider.getUriForFile(
                 requireContext(),
                 "${context?.packageName}.provider",
                 file
             )
-            putExtra(Intent.EXTRA_STREAM, fileUri)
+            files.add(fileUri)
+
+            val textFileUri: Uri = FileProvider.getUriForFile(
+                requireContext(),
+                "${context?.packageName}.provider",
+                textFile
+            )
+            files.add(textFileUri)
+
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
         }
 
         try {
@@ -108,5 +166,15 @@ class RecapitulatifFragment : Fragment() {
         } catch (e: Exception) {
             Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        val fragment = ClientFragment()
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

@@ -31,6 +31,7 @@
                 android:layout_marginBottom="@dimen/default_card_margin"
                 android:layout_marginEnd="@dimen/default_card_margin"
                 android:orientation="vertical"
+                android:backgroundTint="@color/white"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="5dp"
                 app:contentPadding="12dp"
@@ -67,6 +68,7 @@
                 android:layout_weight="1"
                 android:text="@string/annuler"
                 android:textSize="@dimen/general_text_size"
+                android:textColor="@color/primary"
                 app:strokeColor="@color/primary"
                 app:strokeWidth="2dp" />
 
@@ -77,6 +79,8 @@
                 android:layout_marginStart="32dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white"
                 android:text="@string/envoyer"
                 android:textSize="@dimen/general_text_size" />
 

@@ -38,6 +38,8 @@ import java.util.Locale
 
 
 class SharedViewModel : ViewModel() {
+    private var dateBonFormat = SimpleDateFormat("yy", Locale.getDefault())
+
     val selectedCommercial = MutableLiveData<Commercial?>()
 
     val selectedClient = MutableLiveData<Client?>()
@@ -264,5 +266,17 @@ class SharedViewModel : ViewModel() {
     val commentaireSaisi = _commentaireSaisi.asStateFlow()
     fun changementCommentaire(texte: String){
         _commentaireSaisi.value = texte
+    }
+
+    fun genererNumeroBon(): String {
+        val numeroBon: String
+
+        val heureFormat = SimpleDateFormat("HHmm")
+        val today = LocalDate.now()
+        val dayOfYear = today.format(DateTimeFormatter.ofPattern("DDD"))
+
+        numeroBon = "${dateBonFormat.format(Date())}$dayOfYear${heureFormat.format(Date())}"
+
+        return numeroBon
     }
 }
