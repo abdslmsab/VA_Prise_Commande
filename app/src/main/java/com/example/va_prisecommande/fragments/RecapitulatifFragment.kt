@@ -17,8 +17,13 @@ import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.va_prisecommande.ftp.FtpDownloadTask
 import com.example.va_prisecommande.ftp.FtpSendFileTask
 import com.example.va_prisecommande.viewmodel.SharedViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.FileWriter
 
 class RecapitulatifFragment : Fragment() {
@@ -87,8 +92,8 @@ class RecapitulatifFragment : Fragment() {
 
             // Envoi de l'email avec le fichier PDF en pièce jointe
             if (file.exists()) {
-                sendEmail("commandes@vital-aine.com", subject, message, file, textFile)
                 generateTextFile()
+                sendEmail("commandes@vital-aine.com", subject, message, file, textFile)
                 sharedViewModel.viderToutLePanier()
             } else {
                 Toast.makeText(requireContext(), "Fichier PDF non trouvé", Toast.LENGTH_SHORT).show()
@@ -117,19 +122,32 @@ class RecapitulatifFragment : Fragment() {
             writer.write(content ?: "")
             writer.close()
 
+            lifecycleScope.launch {
+                if (uploadTextFile(file.absolutePath, "/Commandes/$fileName")) {
+                    Toast.makeText(context, "Fichier envoyé avec succès.", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "Échec de l'envoi", Toast.LENGTH_LONG).show()
+                }
+            }
+
             Toast.makeText(
                 requireContext(),
                 "Le fichier '$fileName' a bien été créé",
                 Toast.LENGTH_LONG
             ).show()
 
-            FtpSendFileTask().uploadTextFile("141.94.170.53", "ftpVital", "Kz5Jkud6GG", file.absolutePath, "/Commandes/$fileName")
         } catch (e: Exception) {
             Toast.makeText(
                 requireContext(),
                 "Une erreur est survenue: ${e.message}",
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+    suspend fun uploadTextFile(localFilePath: String, remoteFilePath: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            FtpSendFileTask().uploadTextFile("141.94.170.53", "ftpVital", "Kz5Jkud6GG", localFilePath, remoteFilePath)
         }
     }
 
