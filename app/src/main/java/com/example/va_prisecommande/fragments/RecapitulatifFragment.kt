@@ -78,6 +78,7 @@ class RecapitulatifFragment : Fragment() {
             val consigne = sharedViewModel.commentaireSaisi.value.ifEmpty { "Aucune" }
             val numeroClient = sharedViewModel.selectedClient.value?.code + " | " + sharedViewModel.selectedClient.value?.nom
             val dateLivraison = sharedViewModel.dateLivraisonSaisie.value
+            val dateRetour = sharedViewModel.dateRetourSaisie.value
             val prenomCommercial = sharedViewModel.selectedCommercial.value?.prenom ?: ""
             val nomCommercial = sharedViewModel.selectedCommercial.value?.nom ?: ""
             val commercial = "$prenomCommercial $nomCommercial"
@@ -87,8 +88,8 @@ class RecapitulatifFragment : Fragment() {
                 "N° Art. : ${article.code} | Qté UVC : ${article.quantiteUvc ?: 0} | N° Lot : ${article.numLot ?: "Non spécifié"} | DDM : ${article.ddm ?: "Non spécifiée"} | PVC : ${article.pvc ?: "Non spécifié"}"
             } ?: "Le panier est vide"
 
-            val subject = "VA x COMMANDES - $nomClient"
-            val message = "Commande à enregistrer immédiatement\n\nN° Client : $numeroClient\nDate Livr. : $dateLivraison\nVendeur : $commercial\n\nPLV : $plv\n\n$listePanier\n\nConsigne + : $consigne\n\nMerci"
+            val subject = if (documentType == DocumentType.COMMANDE) "VA x COMMANDES - $nomClient" else if (documentType == DocumentType.RETOUR) "VA x RETOURS - $nomClient" else "VA x AVOIRS - $nomClient"
+            val message = if (documentType == DocumentType.COMMANDE) "Commande à enregistrer immédiatement\n\nN° Client : $numeroClient\nDate Livr. : $dateLivraison\nVendeur : $commercial\n\nPLV : $plv\n\n$listePanier\n\nConsigne + : $consigne\n\nMerci" else if (documentType == DocumentType.RETOUR) "Retour à enregistrer immédiatement\n\nN° Client : $numeroClient\nDate Retour : $dateRetour\nVendeur : $commercial\n\n$listePanier\n\nConsigne + : $consigne\n\nMerci" else "Avoir à enregistrer immédiatement\n\nN° Client : $numeroClient\nDate Retour : $dateRetour\nVendeur : $commercial\n\n$listePanier\n\nConsigne + : $consigne\n\nMerci"
 
             // Envoi de l'email avec le fichier PDF en pièce jointe
             if (file.exists()) {
@@ -111,9 +112,14 @@ class RecapitulatifFragment : Fragment() {
         val numeroBon = sharedViewModel.genererNumeroBon()
         val codeClient = sharedViewModel.selectedClient.value?.code
         val dateLivraison = sharedViewModel.dateLivraisonSaisie.value
+        val dateRetour = sharedViewModel.dateRetourSaisie.value
 
-        val content = sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
-            "$numeroBon,$codeClient,$dateLivraison,${article.code},${article.quantite ?: 0}, ${article.conditionnement ?: 0}"
+        val content = if (documentType == DocumentType.COMMANDE) sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
+            "$numeroBon,$codeClient,$dateLivraison,${article.code},${article.quantite ?: 0}, ${article.conditionnement ?: 0}, BC"
+        } else if (documentType == DocumentType.RETOUR) sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
+            "$numeroBon,$codeClient,$dateRetour,${article.code},${article.quantiteUvc ?: 0}, BR"
+        } else sharedViewModel.articlesDansLePanier.value?.joinToString(separator = "\n") { article ->
+            "$numeroBon,$codeClient,$dateRetour,${article.code},${article.quantiteUvc ?: 0}, BA"
         }
 
         try {
@@ -123,18 +129,8 @@ class RecapitulatifFragment : Fragment() {
             writer.close()
 
             lifecycleScope.launch {
-                if (uploadTextFile(file.absolutePath, "/Commandes/$fileName")) {
-                    Toast.makeText(context, "Fichier envoyé avec succès.", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(context, "Échec de l'envoi", Toast.LENGTH_LONG).show()
-                }
+                uploadTextFile(file.absolutePath, "/Commandes/$fileName")
             }
-
-            Toast.makeText(
-                requireContext(),
-                "Le fichier '$fileName' a bien été créé",
-                Toast.LENGTH_LONG
-            ).show()
 
         } catch (e: Exception) {
             Toast.makeText(
