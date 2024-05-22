@@ -37,7 +37,6 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-
         viewModel.selectedCommercial.observe(this) { selectedCommercial ->
             commercial = selectedCommercial
         }
@@ -49,14 +48,32 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
-
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val verticalRecyclerView = view.findViewById<RecyclerView>(R.id.vertical_recycler_view)
 
         progressBar.visibility = View.VISIBLE
 
+        lifecycleScope.launch {
+            try {
+                DataRepository.loadAllData()
+                val commerciaux = DataRepository.commerciaux
+
+                if (commerciaux != null) {
+                    salespersonAdapter = SalespersonAdapter(commerciaux)
+                    verticalRecyclerView.adapter = salespersonAdapter
+                } else {
+                    Toast.makeText(context, "Impossible de charger les données des commerciaux", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(context, "Erreur lors du chargement des données", Toast.LENGTH_LONG).show()
+            } finally {
+                progressBar.visibility = View.GONE
+            }
+        }
+
         if (!initializeDatabase()) {
-            // Toast.makeText(context, "Erreur lors de l'initialisation de la base de données", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Erreur lors de l'initialisation de la base de données", Toast.LENGTH_LONG).show()
         }
 
         lifecycleScope.launch {

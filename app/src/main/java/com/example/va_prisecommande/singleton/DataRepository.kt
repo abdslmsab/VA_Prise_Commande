@@ -1,21 +1,27 @@
 package com.example.va_prisecommande.singleton
 
 import Client
+import android.content.Context
 import com.example.va_prisecommande.ftp.FtpDownloadTask
 import com.example.va_prisecommande.model.Article
 import com.example.va_prisecommande.model.Commercial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.apache.commons.net.ftp.FTPClient
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.ByteArrayOutputStream
 import java.io.StringReader
+import java.nio.charset.Charset
 
 object DataRepository {
     var commerciaux: List<Commercial>? = null
-    var clients: List<Client>? = null
-    var articles: List<Article>? = null
     var commerciauxXml: String? = null
+
+    var clients: List<Client>? = null
     var clientsXml: String? = null
+
+    var articles: List<Article>? = null
     var articlesXml: String? = null
 
     /*
@@ -193,5 +199,22 @@ object DataRepository {
         }
 
         return articlesMap.values.toList()
+    }
+
+    private fun saveXmlToFile(context: Context, xml: String) {
+        context.openFileOutput("commerciaux.xml", Context.MODE_PRIVATE).use {
+            it.write(xml.toByteArray())
+        }
+    }
+
+    private fun loadXmlFromFile(context: Context): String? {
+        return try {
+            context.openFileInput("commerciaux.xml").bufferedReader().use {
+                it.readText()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }
